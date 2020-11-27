@@ -1,0 +1,12 @@
+{
+    "id": "MyGitPull",
+    "types": [
+      "Tdip.Qapio.Community.Extensions.Git.GitPull"
+    ],
+    "settings": {
+      "repositoryPath": "{{directory://}}",
+      "branch": "main",
+      "fullname": "Ernesto Rodriguez",
+      "email": "ernesto.rodriguez@qapio.com"
+    }
+  }

@@ -1,0 +1,9 @@
+{
+    "id": "iex-charts",
+    "types": [
+        "http-static-server"
+    ],
+    "http-static-server": {
+        "www-public": "dist"
+    }
+}
