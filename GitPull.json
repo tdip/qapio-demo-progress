@@ -7,7 +7,7 @@
       "username": "",
       "token": "",
       "repositoryPath": "{{directory://}}",
-      "branch": "main",
+      "branch": "master",
       "fullname": "Ernesto Rodriguez",
       "email": "ernesto.rodriguez@qapio.com"
     }
