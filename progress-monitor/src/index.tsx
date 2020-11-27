@@ -5,7 +5,7 @@ function MainComponent(props: {}) {
 
     return (
         <div>
-            Hello! Good Monrning
+            Hello! Good Monrning, How Are you!
         </div>
     );
 }
