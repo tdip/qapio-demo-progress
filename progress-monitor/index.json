@@ -1,5 +1,5 @@
 {
-    "id": "iex-charts",
+    "id": "progress-monitor",
     "types": [
         "http-static-server"
     ],
