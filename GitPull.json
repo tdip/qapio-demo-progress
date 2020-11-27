@@ -4,6 +4,8 @@
       "Tdip.Qapio.Community.Extensions.Git.GitPull"
     ],
     "settings": {
+      "username": "",
+      "token": "",
       "repositoryPath": "{{directory://}}",
       "branch": "main",
       "fullname": "Ernesto Rodriguez",
