@@ -1,25 +1,28 @@
 {
   "name": "progress-monitor",
   "version": "1.0.0",
-  "description": "",
+  "description": "## Instructions",
   "main": "index.js",
   "scripts": {
-    "build": "parcel build --public-url /static/progress-monitor/ -o dist/index.html src/index.html",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "parcel build --public-url /progress-monitor/ -o dist/index.html src/index.html",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "parcel src/index.html --open"
   },
   "author": "Turning Data Into Products A.S.",
   "license": "ISC",
   "devDependencies": {
-    "@types/react": "^16.9.55",
-    "@types/react-dom": "^16.9.9",
+    "@types/node": "^14.14.10",
+    "@types/react": "^16.14.2",
+    "@types/react-dom": "^16.9.10",
     "@types/victory": "^33.1.4",
     "parcel-bundler": "^1.12.4",
-    "typescript": "^4.0.5"
+    "typescript": "^4.1.2"
   },
   "dependencies": {
+    "@influxdata/influxdb-client": "^1.8.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "uuid": "^8.3.1",
-    "victory": "^35.3.3"
+    "victory": "^35.4.0"
   }
 }

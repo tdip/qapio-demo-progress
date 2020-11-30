@@ -1,21 +1,15 @@
 import * as React from "react"
 import * as ReactDom from "react-dom"
+import './index.css';
+import App from './App';
+//import reportWebVitals from './reportWebVitals';
 
-function MainComponent(props: {}) {
+const start = async (event:any) => {
 
-    return (
-        <div>
-            ALO!
-        </div>
-    );
-}
-
-const start = async (event) => {
-
-    ReactDom.render(
-        <MainComponent />,
-        document.getElementById("root")
-    );
+  ReactDom.render(
+      <App />,
+      document.getElementById("root")
+  );
 }
 
 window.addEventListener('load', start);
