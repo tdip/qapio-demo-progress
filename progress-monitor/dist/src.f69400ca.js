@@ -83454,25 +83454,15 @@ var victory_1 = require("victory");
 
 require("./App.css");
 
+var InfluxDB = require('@influxdata/influxdb-client').InfluxDB;
+
+var token = 'uqHc90bGrOaAwv0LODYN9HnMCAWP_CEeqYyCSY0_fOf8nlZkxkhDMagQ-frTErlNIc0sVWZUW6PagaPtTHSVXA==';
+var org = 'qapio';
+var bucket = 'qapio';
 ;
 
 function App() {
-  var pru = [{
-    x: new Date('2020-11-26T00:45:36.801318465Z'),
-    y: 29
-  }, {
-    x: new Date('2020-11-26T00:45:46.803954889Z'),
-    y: 30
-  }, {
-    x: new Date('2020-11-26T00:45:56.803168549Z'),
-    y: 30
-  }, {
-    x: new Date('2020-11-26T00:46:06.804979747Z'),
-    y: 30
-  }, {
-    x: new Date('2020-11-26T00:46:16.804199074Z'),
-    y: 41
-  }];
+  var temp = [];
 
   var _a = React.useState({
     init: "",
@@ -83481,7 +83471,7 @@ function App() {
       date = _a[0],
       setDate = _a[1];
 
-  var _b = React.useState(pru),
+  var _b = React.useState(temp),
       arreglo = _b[0],
       setArreglo = _b[1];
 
@@ -83493,46 +83483,52 @@ function App() {
   };
 
   var dataInflux = function dataInflux() {
-    var InfluxDB = require('@influxdata/influxdb-client').InfluxDB;
-
-    var token = 'uqHc90bGrOaAwv0LODYN9HnMCAWP_CEeqYyCSY0_fOf8nlZkxkhDMagQ-frTErlNIc0sVWZUW6PagaPtTHSVXA==';
-    var org = 'qapio';
-    var bucket = 'qapio';
-    var temp = [];
+    var temp2 = [];
     var client = new InfluxDB({
       url: 'http://localhost:8086',
       token: token
     });
     var queryApi = client.getQueryApi(org);
-    var query = "from(bucket: \"" + bucket + "\") |> range(start: 2020-1-1)\n    |> filter(fn: (r) => r._measurement == \"go_gc_duration_seconds\")\n    |> filter(fn: (r) => r._field == \"count\")\n    |> filter(fn: (r) => r._time >= " + date.init + ")\n    |> filter(fn: (r) => r._time <= " + date.end + ")\n    |> limit(n: 50)";
+    var query = "from(bucket: \"" + bucket + "\")\n|> range(start: " + date.init + "T00:00:00Z, stop: " + date.end + "T23:59:00Z)\n|> filter(fn: (r) => r._measurement == \"go_gc_duration_seconds\")\n|> filter(fn: (r) => r._field == \"count\")\n|> aggregateWindow(fn: mean, every: 3h)";
     queryApi.queryRows(query, {
       next: function next(row, tableMeta) {
         var o = tableMeta.toObject(row);
         var nume = parseFloat("" + o._value);
         var fecha = o._time;
-        temp.push({
-          x: new Date(fecha.toString()),
-          y: nume
-        });
+
+        if (nume >= 0 || nume < 0) {
+          temp.push({
+            x: new Date(fecha.toString()),
+            y: nume
+          });
+        }
       },
       error: function error(_error) {
         console.error(_error);
         console.log('\\nFinished ERROR');
-        setArreglo([]);
       },
       complete: function complete() {
         console.log('\\nFinished SUCCESS');
       }
-    });
-    setArreglo(temp);
+    }); //return temp;
   };
+  /*
+   from(bucket: "qapio") |> range(start: 2020)
+  |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
+  |> filter(fn: (r) => r._field == "count")
+   
+  */
+
 
   var handleSubmit = function handleSubmit(event) {
+    event.preventDefault();
+
     if (date.init !== '' || date.end !== '') {
       dataInflux();
+      setArreglo(temp);
+      console.log("hola"); //setArreglo(dataInflux());
     }
 
-    event.preventDefault();
     setDate({
       init: "",
       end: ""
@@ -83568,7 +83564,7 @@ function App() {
       }
     },
     data: arreglo
-  }))));
+  }), console.log(arreglo), console.log(temp))));
 }
 
 exports.default = App;
@@ -83811,7 +83807,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "41469" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40601" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

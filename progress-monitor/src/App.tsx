@@ -2,6 +2,12 @@ import * as React from "react"
 import { VictoryLine, VictoryChart, VictoryZoomContainer } from 'victory';
 import './App.css';
 
+const {InfluxDB} = require('@influxdata/influxdb-client')
+
+    const token = 'uqHc90bGrOaAwv0LODYN9HnMCAWP_CEeqYyCSY0_fOf8nlZkxkhDMagQ-frTErlNIc0sVWZUW6PagaPtTHSVXA=='
+    const org = 'qapio'
+    const bucket = 'qapio'
+
 interface tabla {x: Date, y: number};
 type ReactForm = React.FormEvent<HTMLFormElement>;
 type ReactFormInput = React.FormEvent<HTMLInputElement>;
@@ -9,16 +15,10 @@ type ReactFormInput = React.FormEvent<HTMLInputElement>;
 
 
 function App() {
-  const pru:tabla[]=[
-    {x: new Date('2020-11-26T00:45:36.801318465Z'), y: 29},
-    {x: new Date('2020-11-26T00:45:46.803954889Z'), y: 30},
-    {x: new Date('2020-11-26T00:45:56.803168549Z'), y: 30},
-    {x: new Date('2020-11-26T00:46:06.804979747Z'), y: 30},
-    {x: new Date('2020-11-26T00:46:16.804199074Z'), y: 41}
-    ];
+  var temp:tabla[]=[];
 
   const [date, setDate] = React.useState({init:"", end:""});
-  const [arreglo, setArreglo] = React.useState<tabla[]>(pru);
+  const [arreglo, setArreglo] = React.useState<tabla[]>(temp);
   
   const handleInputChange = (event: ReactFormInput) => {
     const element = event.target as HTMLInputElement;
@@ -29,47 +29,56 @@ function App() {
   }
 
   const dataInflux = () => {
-    const {InfluxDB} = require('@influxdata/influxdb-client')
-
-    const token = 'uqHc90bGrOaAwv0LODYN9HnMCAWP_CEeqYyCSY0_fOf8nlZkxkhDMagQ-frTErlNIc0sVWZUW6PagaPtTHSVXA=='
-    const org = 'qapio'
-    const bucket = 'qapio'
-    var temp:tabla[] = [];
+    
+    const temp2:tabla[] = []
 
     const client = new InfluxDB({url: 'http://localhost:8086', token: token})
 
     const queryApi = client.getQueryApi(org)
 
-    const query = `from(bucket: "${bucket}") |> range(start: 2020-1-1)
-    |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
-    |> filter(fn: (r) => r._field == "count")
-    |> filter(fn: (r) => r._time >= ${date.init})
-    |> filter(fn: (r) => r._time <= ${date.end})
-    |> limit(n: 50)`
+    const query = `from(bucket: "${bucket}")
+|> range(start: ${date.init}T00:00:00Z, stop: ${date.end}T23:59:00Z)
+|> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
+|> filter(fn: (r) => r._field == "count")
+|> aggregateWindow(fn: mean, every: 3h)`
     queryApi.queryRows(query, {
       next(row:any, tableMeta:any) {
         const o = tableMeta.toObject(row)
         var nume = parseFloat(`${o._value}`)
         var fecha = o._time;
+        if(nume >= 0 || nume < 0){
         temp.push({ x: new Date(fecha.toString()), y: nume})
+      }
       },
-      error(error) {
+      error(error:any) {
         console.error(error)
         console.log('\\nFinished ERROR')
-        setArreglo([])
+        
       },
       complete() {
         console.log('\\nFinished SUCCESS')
       },
     })
-    setArreglo(temp);
+    //return temp;
   }
+  /*
+
+from(bucket: "qapio") |> range(start: 2020)
+|> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
+|> filter(fn: (r) => r._field == "count")
+
+
+  */
 
   const handleSubmit = (event:ReactForm) => {
+    event.preventDefault();
+
     if(date.init !== '' || date.end !== ''){
       dataInflux();
+      setArreglo(temp);
+      console.log("hola")
+      //setArreglo(dataInflux());
     }
-    event.preventDefault();
     setDate({init:"", end:""})
   }
 
@@ -97,6 +106,8 @@ function App() {
             style={{data: {stroke: "tomato"}}}
             data={arreglo}
           />
+          {console.log(arreglo)}
+          {console.log(temp)}
           </VictoryChart>
       </div>
     </React.Fragment>
