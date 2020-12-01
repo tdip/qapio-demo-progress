@@ -83366,7 +83366,7 @@ var _victorySharedEvents = require("victory-shared-events");
 var _victoryAxis = require("victory-axis");
 
 var _victoryPolarAxis = require("victory-polar-axis");
-},{"victory-core":"../node_modules/victory-core/es/index.js","victory-chart":"../node_modules/victory-chart/es/index.js","victory-group":"../node_modules/victory-group/es/index.js","victory-stack":"../node_modules/victory-stack/es/index.js","victory-pie":"../node_modules/victory-pie/es/index.js","victory-area":"../node_modules/victory-area/es/index.js","victory-bar":"../node_modules/victory-bar/es/index.js","victory-candlestick":"../node_modules/victory-candlestick/es/index.js","victory-errorbar":"../node_modules/victory-errorbar/es/index.js","victory-histogram":"../node_modules/victory-histogram/es/index.js","victory-line":"../node_modules/victory-line/es/index.js","victory-scatter":"../node_modules/victory-scatter/es/index.js","victory-box-plot":"../node_modules/victory-box-plot/es/index.js","victory-voronoi":"../node_modules/victory-voronoi/es/index.js","victory-brush-line":"../node_modules/victory-brush-line/es/index.js","victory-brush-container":"../node_modules/victory-brush-container/es/index.js","victory-cursor-container":"../node_modules/victory-cursor-container/es/index.js","victory-selection-container":"../node_modules/victory-selection-container/es/index.js","victory-voronoi-container":"../node_modules/victory-voronoi-container/es/index.js","victory-zoom-container":"../node_modules/victory-zoom-container/es/index.js","victory-create-container":"../node_modules/victory-create-container/es/index.js","victory-tooltip":"../node_modules/victory-tooltip/es/index.js","victory-legend":"../node_modules/victory-legend/es/index.js","victory-shared-events":"../node_modules/victory-shared-events/es/index.js","victory-axis":"../node_modules/victory-axis/es/index.js","victory-polar-axis":"../node_modules/victory-polar-axis/es/index.js"}],"App.css":[function(require,module,exports) {
+},{"victory-core":"../node_modules/victory-core/es/index.js","victory-chart":"../node_modules/victory-chart/es/index.js","victory-group":"../node_modules/victory-group/es/index.js","victory-stack":"../node_modules/victory-stack/es/index.js","victory-pie":"../node_modules/victory-pie/es/index.js","victory-area":"../node_modules/victory-area/es/index.js","victory-bar":"../node_modules/victory-bar/es/index.js","victory-candlestick":"../node_modules/victory-candlestick/es/index.js","victory-errorbar":"../node_modules/victory-errorbar/es/index.js","victory-histogram":"../node_modules/victory-histogram/es/index.js","victory-line":"../node_modules/victory-line/es/index.js","victory-scatter":"../node_modules/victory-scatter/es/index.js","victory-box-plot":"../node_modules/victory-box-plot/es/index.js","victory-voronoi":"../node_modules/victory-voronoi/es/index.js","victory-brush-line":"../node_modules/victory-brush-line/es/index.js","victory-brush-container":"../node_modules/victory-brush-container/es/index.js","victory-cursor-container":"../node_modules/victory-cursor-container/es/index.js","victory-selection-container":"../node_modules/victory-selection-container/es/index.js","victory-voronoi-container":"../node_modules/victory-voronoi-container/es/index.js","victory-zoom-container":"../node_modules/victory-zoom-container/es/index.js","victory-create-container":"../node_modules/victory-create-container/es/index.js","victory-tooltip":"../node_modules/victory-tooltip/es/index.js","victory-legend":"../node_modules/victory-legend/es/index.js","victory-shared-events":"../node_modules/victory-shared-events/es/index.js","victory-axis":"../node_modules/victory-axis/es/index.js","victory-polar-axis":"../node_modules/victory-polar-axis/es/index.js"}],"styles.scss":[function(require,module,exports) {
 var reloadCSS = require('_css_loader');
 
 module.hot.dispose(reloadCSS);
@@ -83452,13 +83452,17 @@ var React = __importStar(require("react"));
 
 var victory_1 = require("victory");
 
-require("./App.css");
+require("./styles.scss");
 
 var InfluxDB = require('@influxdata/influxdb-client').InfluxDB;
 
 var token = 'uqHc90bGrOaAwv0LODYN9HnMCAWP_CEeqYyCSY0_fOf8nlZkxkhDMagQ-frTErlNIc0sVWZUW6PagaPtTHSVXA==';
 var org = 'qapio';
 var bucket = 'qapio';
+var client = new InfluxDB({
+  url: 'http://localhost:8086',
+  token: token
+});
 ;
 
 function App() {
@@ -83475,6 +83479,10 @@ function App() {
       arreglo = _b[0],
       setArreglo = _b[1];
 
+  var _c = React.useState([]),
+      datos = _c[0],
+      setDatos = _c[1];
+
   var handleInputChange = function handleInputChange(event) {
     var _a;
 
@@ -83483,13 +83491,8 @@ function App() {
   };
 
   var dataInflux = function dataInflux() {
-    var temp2 = [];
-    var client = new InfluxDB({
-      url: 'http://localhost:8086',
-      token: token
-    });
     var queryApi = client.getQueryApi(org);
-    var query = "from(bucket: \"" + bucket + "\")\n|> range(start: " + date.init + "T00:00:00Z, stop: " + date.end + "T23:59:00Z)\n|> filter(fn: (r) => r._measurement == \"go_gc_duration_seconds\")\n|> filter(fn: (r) => r._field == \"count\")\n|> aggregateWindow(fn: mean, every: 3h)";
+    var query = "from(bucket: \"" + bucket + "\")\n      |> range(start: " + date.init + "T00:00:00Z, stop: " + date.end + "T23:59:00Z)\n      |> filter(fn: (r) => r._measurement == \"go_gc_duration_seconds\")\n      |> filter(fn: (r) => r._field == \"count\")\n      |> aggregateWindow(fn: mean, every: 3h)";
     queryApi.queryRows(query, {
       next: function next(row, tableMeta) {
         var o = tableMeta.toObject(row);
@@ -83510,15 +83513,8 @@ function App() {
       complete: function complete() {
         console.log('\\nFinished SUCCESS');
       }
-    }); //return temp;
+    });
   };
-  /*
-   from(bucket: "qapio") |> range(start: 2020)
-  |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
-  |> filter(fn: (r) => r._field == "count")
-   
-  */
-
 
   var handleSubmit = function handleSubmit(event) {
     event.preventDefault();
@@ -83533,6 +83529,7 @@ function App() {
       init: "",
       end: ""
     });
+    setDatos(arreglo);
   };
 
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("form", {
@@ -83563,12 +83560,12 @@ function App() {
         stroke: "tomato"
       }
     },
-    data: arreglo
-  }), console.log(arreglo), console.log(temp))));
+    data: datos
+  }))));
 }
 
 exports.default = App;
-},{"react":"../node_modules/react/index.js","victory":"../node_modules/victory/es/index.js","./App.css":"App.css","@influxdata/influxdb-client":"../node_modules/@influxdata/influxdb-client/dist/index.browser.js"}],"index.tsx":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","victory":"../node_modules/victory/es/index.js","./styles.scss":"styles.scss","@influxdata/influxdb-client":"../node_modules/@influxdata/influxdb-client/dist/index.browser.js"}],"index.tsx":[function(require,module,exports) {
 "use strict";
 
 var __createBinding = this && this.__createBinding || (Object.create ? function (o, m, k, k2) {
@@ -83807,7 +83804,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40601" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "44809" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

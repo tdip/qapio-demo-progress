@@ -1,12 +1,14 @@
+import { send } from "process";
 import * as React from "react"
-import { VictoryLine, VictoryChart, VictoryZoomContainer } from 'victory';
-import './App.css';
+import { VictoryLine, VictoryChart, svg, VictoryZoomContainer} from 'victory';
+import './styles.scss';
 
 const {InfluxDB} = require('@influxdata/influxdb-client')
 
     const token = 'uqHc90bGrOaAwv0LODYN9HnMCAWP_CEeqYyCSY0_fOf8nlZkxkhDMagQ-frTErlNIc0sVWZUW6PagaPtTHSVXA=='
     const org = 'qapio'
     const bucket = 'qapio'
+    const client = new InfluxDB({url: 'http://localhost:8086', token: token})
 
 interface tabla {x: Date, y: number};
 type ReactForm = React.FormEvent<HTMLFormElement>;
@@ -19,6 +21,8 @@ function App() {
 
   const [date, setDate] = React.useState({init:"", end:""});
   const [arreglo, setArreglo] = React.useState<tabla[]>(temp);
+  const [datos, setDatos] = React.useState<tabla[]>([]);
+
   
   const handleInputChange = (event: ReactFormInput) => {
     const element = event.target as HTMLInputElement;
@@ -29,18 +33,15 @@ function App() {
   }
 
   const dataInflux = () => {
-    
-    const temp2:tabla[] = []
-
-    const client = new InfluxDB({url: 'http://localhost:8086', token: token})
 
     const queryApi = client.getQueryApi(org)
 
     const query = `from(bucket: "${bucket}")
-|> range(start: ${date.init}T00:00:00Z, stop: ${date.end}T23:59:00Z)
-|> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
-|> filter(fn: (r) => r._field == "count")
-|> aggregateWindow(fn: mean, every: 3h)`
+      |> range(start: ${date.init}T00:00:00Z, stop: ${date.end}T23:59:00Z)
+      |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
+      |> filter(fn: (r) => r._field == "count")
+      |> aggregateWindow(fn: mean, every: 3h)`;
+
     queryApi.queryRows(query, {
       next(row:any, tableMeta:any) {
         const o = tableMeta.toObject(row)
@@ -59,16 +60,8 @@ function App() {
         console.log('\\nFinished SUCCESS')
       },
     })
-    //return temp;
+    
   }
-  /*
-
-from(bucket: "qapio") |> range(start: 2020)
-|> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
-|> filter(fn: (r) => r._field == "count")
-
-
-  */
 
   const handleSubmit = (event:ReactForm) => {
     event.preventDefault();
@@ -80,6 +73,7 @@ from(bucket: "qapio") |> range(start: 2020)
       //setArreglo(dataInflux());
     }
     setDate({init:"", end:""})
+    setDatos(arreglo)
   }
 
   return (
@@ -103,11 +97,11 @@ from(bucket: "qapio") |> range(start: 2020)
           containerComponent={<VictoryZoomContainer/>}
         >
           <VictoryLine
+
             style={{data: {stroke: "tomato"}}}
-            data={arreglo}
+            data={datos}
+            
           />
-          {console.log(arreglo)}
-          {console.log(temp)}
           </VictoryChart>
       </div>
     </React.Fragment>

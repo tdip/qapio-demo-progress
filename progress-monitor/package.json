@@ -4,7 +4,7 @@
   "description": "## Instructions",
   "main": "index.js",
   "scripts": {
-    "build": "parcel build --public-url /progress-monitor/ -o dist/index.html src/index.html",
+    "build": "parcel build --public-url http://localhost:8080/static/progress-monitor/index.html/ -o dist/index.html src/index.html",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "parcel src/index.html --open"
   },
@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@influxdata/influxdb-client": "^1.8.0",
+    "node-sass": "^5.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "uuid": "^8.3.1",
