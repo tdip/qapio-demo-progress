@@ -1,11 +1,12 @@
-import { send } from "process";
+
 import * as React from "react"
-import { VictoryLine, VictoryChart, VictoryZoomContainer} from 'victory';
+import {getStyles} from './styles_Graphics'
+import { VictoryLine, VictoryChart, VictoryZoomContainer, VictoryAxis} from 'victory';
 import './styles.scss';
 
 const {InfluxDB} = require('@influxdata/influxdb-client')
 
-    const token = 'uqHc90bGrOaAwv0LODYN9HnMCAWP_CEeqYyCSY0_fOf8nlZkxkhDMagQ-frTErlNIc0sVWZUW6PagaPtTHSVXA=='
+    const token = 'eq7dSOgd_afLSeNPXsmbh05BtT-YgSOavpv7up0dR4wpxV6QHNMIiQPfCaokprFL3mQqazQSmiq9NisyTlnPog=='
     const org = 'qapio'
     const bucket = 'qapio'
     const client = new InfluxDB({url: 'http://localhost:8086', token: token})
@@ -14,14 +15,13 @@ interface tabla {x: Date, y: number};
 type ReactForm = React.FormEvent<HTMLFormElement>;
 type ReactFormInput = React.FormEvent<HTMLInputElement>;
 
-
-
 function App() {
   var temp:tabla[]=[];
 
   const [date, setDate] = React.useState({init:"", end:""});
   const [arreglo, setArreglo] = React.useState<tabla[]>(temp);
   const [datos, setDatos] = React.useState<tabla[]>([]);
+  const [styles, setStyles] = React.useState(getStyles());
 
   
   const handleInputChange = (event: ReactFormInput) => {
@@ -40,7 +40,7 @@ function App() {
       |> range(start: ${date.init}T00:00:00Z, stop: ${date.end}T23:59:00Z)
       |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
       |> filter(fn: (r) => r._field == "count")
-      |> aggregateWindow(fn: mean, every: 3h)`;
+      `;
 
     queryApi.queryRows(query, {
       next(row:any, tableMeta:any) {
@@ -96,10 +96,18 @@ function App() {
           scale={{x: "time"}}
           containerComponent={<VictoryZoomContainer/>}
         >
+          <VictoryAxis
+            style={styles.dependet}
+          />
+          <VictoryAxis dependentAxis
+            style={styles.independet}
+          />
+            
           <VictoryLine
 
             style={{data: {stroke: "tomato"}}}
             data={datos}
+            
             
           />
           </VictoryChart>

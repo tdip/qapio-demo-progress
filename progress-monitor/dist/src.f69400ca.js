@@ -29844,7 +29844,55 @@ var reloadCSS = require('_css_loader');
 
 module.hot.dispose(reloadCSS);
 module.hot.accept(reloadCSS);
-},{"_css_loader":"../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"../node_modules/react-is/cjs/react-is.development.js":[function(require,module,exports) {
+},{"_css_loader":"../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"styles_Graphics.tsx":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getStyles = void 0;
+
+function getStyles() {
+  return {
+    // Y
+    dependet: {
+      axis: {
+        stroke: "white",
+        strokeWidth: 1
+      },
+      tickLabels: {
+        fill: "white",
+        fontFamily: "inherit",
+        fontSize: 16
+      }
+    },
+    // X
+    independet: {
+      grid: {
+        stroke: function stroke(_a) {
+          var tick = _a.tick;
+          return tick === -10 ? "transparent" : "#ffffff";
+        },
+        strokeWidth: 0.5
+      },
+      axis: {
+        stroke: "#ffffff",
+        strokeWidth: 0
+      },
+      ticks: {
+        strokeWidth: 0
+      },
+      tickLabels: {
+        fill: "#ffffff",
+        fontFamily: "inherit",
+        fontSize: 16
+      }
+    }
+  };
+}
+
+exports.getStyles = getStyles;
+},{}],"../node_modules/react-is/cjs/react-is.development.js":[function(require,module,exports) {
 /** @license React v16.13.1
  * react-is.development.js
  *
@@ -83450,13 +83498,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var React = __importStar(require("react"));
 
+var styles_Graphics_1 = require("./styles_Graphics");
+
 var victory_1 = require("victory");
 
 require("./styles.scss");
 
 var InfluxDB = require('@influxdata/influxdb-client').InfluxDB;
 
-var token = 'uqHc90bGrOaAwv0LODYN9HnMCAWP_CEeqYyCSY0_fOf8nlZkxkhDMagQ-frTErlNIc0sVWZUW6PagaPtTHSVXA==';
+var token = 'eq7dSOgd_afLSeNPXsmbh05BtT-YgSOavpv7up0dR4wpxV6QHNMIiQPfCaokprFL3mQqazQSmiq9NisyTlnPog==';
 var org = 'qapio';
 var bucket = 'qapio';
 var client = new InfluxDB({
@@ -83483,6 +83533,10 @@ function App() {
       datos = _c[0],
       setDatos = _c[1];
 
+  var _d = React.useState(styles_Graphics_1.getStyles()),
+      styles = _d[0],
+      setStyles = _d[1];
+
   var handleInputChange = function handleInputChange(event) {
     var _a;
 
@@ -83492,7 +83546,7 @@ function App() {
 
   var dataInflux = function dataInflux() {
     var queryApi = client.getQueryApi(org);
-    var query = "from(bucket: \"" + bucket + "\")\n      |> range(start: " + date.init + "T00:00:00Z, stop: " + date.end + "T23:59:00Z)\n      |> filter(fn: (r) => r._measurement == \"go_gc_duration_seconds\")\n      |> filter(fn: (r) => r._field == \"count\")\n      |> aggregateWindow(fn: mean, every: 3h)";
+    var query = "from(bucket: \"" + bucket + "\")\n      |> range(start: " + date.init + "T00:00:00Z, stop: " + date.end + "T23:59:00Z)\n      |> filter(fn: (r) => r._measurement == \"go_gc_duration_seconds\")\n      |> filter(fn: (r) => r._field == \"count\")\n      ";
     queryApi.queryRows(query, {
       next: function next(row, tableMeta) {
         var o = tableMeta.toObject(row);
@@ -83554,7 +83608,12 @@ function App() {
       x: "time"
     },
     containerComponent: /*#__PURE__*/React.createElement(victory_1.VictoryZoomContainer, null)
-  }, /*#__PURE__*/React.createElement(victory_1.VictoryLine, {
+  }, /*#__PURE__*/React.createElement(victory_1.VictoryAxis, {
+    style: styles.dependet
+  }), /*#__PURE__*/React.createElement(victory_1.VictoryAxis, {
+    dependentAxis: true,
+    style: styles.independet
+  }), /*#__PURE__*/React.createElement(victory_1.VictoryLine, {
     style: {
       data: {
         stroke: "tomato"
@@ -83565,7 +83624,7 @@ function App() {
 }
 
 exports.default = App;
-},{"react":"../node_modules/react/index.js","victory":"../node_modules/victory/es/index.js","./styles.scss":"styles.scss","@influxdata/influxdb-client":"../node_modules/@influxdata/influxdb-client/dist/index.browser.js"}],"index.tsx":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","./styles_Graphics":"styles_Graphics.tsx","victory":"../node_modules/victory/es/index.js","./styles.scss":"styles.scss","@influxdata/influxdb-client":"../node_modules/@influxdata/influxdb-client/dist/index.browser.js"}],"index.tsx":[function(require,module,exports) {
 "use strict";
 
 var __createBinding = this && this.__createBinding || (Object.create ? function (o, m, k, k2) {
@@ -83804,7 +83863,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "44809" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "36193" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
