@@ -4,7 +4,7 @@
   "description": "## Instructions",
   "main": "index.js",
   "scripts": {
-    "build": "parcel build --public-url /progress-monitor/ -o dist/index.html src/index.html",
+    "build": "parcel build --public-url /static/progress-monitor/ -o dist/index.html src/index.html",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "parcel src/index.html --open"
   },
