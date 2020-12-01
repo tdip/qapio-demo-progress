@@ -1,7 +1,7 @@
 import { send } from "process";
 import * as React from "react"
 import { VictoryLine, VictoryChart, svg, VictoryZoomContainer} from 'victory';
-import './styles.scss';
+//import './styles.scss';
 
 const {InfluxDB} = require('@influxdata/influxdb-client')
 
