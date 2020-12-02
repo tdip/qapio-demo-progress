@@ -38,7 +38,7 @@ async function start() {
                 selection: {
                     interface: "Tdip.Qapio.Services.InfluxDb.FluxQueryApi",
                     query: {
-                        "url": "http://localhost:8086",
+                        "url": "http://influx:8086",
                         "organization": "qapio",
                         "token": 'eq7dSOgd_afLSeNPXsmbh05BtT-YgSOavpv7up0dR4wpxV6QHNMIiQPfCaokprFL3mQqazQSmiq9NisyTlnPog=='
                     }
