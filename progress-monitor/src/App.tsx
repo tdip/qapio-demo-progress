@@ -2,6 +2,7 @@
 import * as React from "react"
 import {getStyles} from './styles_Graphics'
 import { VictoryLine, VictoryChart, VictoryZoomContainer, VictoryAxis} from 'victory';
+import ReactLoading from "react-loading";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.scss';
@@ -23,6 +24,8 @@ function App() {
   const [date, setDate] = React.useState({init:"", end:""});
   const [arreglo, setArreglo] = React.useState<tabla[]>(temp);
   const [styles, setStyles] = React.useState(getStyles());
+  const [msg, setMsg] = React.useState(<ReactLoading type="spinningBubbles" color="#ffffff"/>);
+  const [loading, setLoading] = React.useState(false);
 
   
   const handleInputChange = (event: ReactFormInput) => {
@@ -44,7 +47,9 @@ function App() {
       |> aggregateWindow(fn: mean, every: 5m)`;
 
     queryApi.queryRows(query, {
+      
       next(row:any, tableMeta:any) {
+        
         const o = tableMeta.toObject(row)
         var nume = parseFloat(`${o._value}`)
         var fecha = o._time;
@@ -55,9 +60,11 @@ function App() {
       error(error:any) {
         console.error(error)
         console.log('\\nFinished ERROR')
+        setMsg(<label>No results</label>)
         
       },
       complete() {
+        setLoading(false)
         console.log('\\nFinished SUCCESS')
       },
     })
@@ -67,7 +74,9 @@ function App() {
   const sendData = () => {
 
     if(date.init !== '' || date.end !== ''){
+      setLoading(true)
       dataInflux();
+      
     }
     setDate({init:"", end:""})
   }
@@ -88,7 +97,7 @@ function App() {
     
 
       <div className="grafico">
-
+        {loading ? msg :(
         <VictoryChart
           scale={{x: "time"}}
           containerComponent={<VictoryZoomContainer/>}
@@ -107,8 +116,9 @@ function App() {
             
             
           />
-          </VictoryChart>
+          </VictoryChart>)}
       </div>
+      
     </React.Fragment>
   );
 }
