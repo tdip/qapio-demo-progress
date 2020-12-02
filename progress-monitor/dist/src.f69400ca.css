@@ -23,8 +23,19 @@ body {
   background: #303634;
   color: white; }
 
-.grafico {
-  width: 50%; }
+.gridContainer {
+  height: 100%; }
+
+.loading {
+  top: auto;
+  bottom: auto; }
+
+.comands, .grafico {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+  text-align: center; }
 
 
 /*# sourceMappingURL=/src.f69400ca.css.map */

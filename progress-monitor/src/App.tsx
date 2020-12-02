@@ -24,7 +24,7 @@ function App() {
   const [date, setDate] = React.useState({init:"", end:""});
   const [arreglo, setArreglo] = React.useState<tabla[]>(temp);
   const [styles, setStyles] = React.useState(getStyles());
-  const [msg, setMsg] = React.useState(<ReactLoading type="spinningBubbles" color="#ffffff"/>);
+  const [msg, setMsg] = React.useState(<div className="loading"><ReactLoading type="spinningBubbles" color="#ffffff"/></div>);
   const [loading, setLoading] = React.useState(false);
 
   
@@ -83,43 +83,46 @@ function App() {
 
 
   return (
-    <React.Fragment>
-      
-        <label>
-          Inicio:
-          <input name="init" type="date" value={date.init} onChange={handleInputChange} />
-        </label>
-        <label>
-          Final:
-          <input name="end" type="date" value={date.end} onChange={handleInputChange} />
-        </label>
-        <input onClick={sendData} type="submit" value="Submit" />
+    <div className="container-fluid gridContainer">
+      <div className="row">
+        <div className="col-sm-9 grafico">
     
+          {loading ? msg :(
+          <VictoryChart
+            scale={{x: "time"}}
+            containerComponent={<VictoryZoomContainer/>}
+          >
+            <VictoryAxis
+              style={styles.dependet}
+            />
+            <VictoryAxis dependentAxis
+              style={styles.independet}
+            />
+              
+            <VictoryLine
 
-      <div className="grafico">
-        {loading ? msg :(
-        <VictoryChart
-          scale={{x: "time"}}
-          containerComponent={<VictoryZoomContainer/>}
-        >
-          <VictoryAxis
-            style={styles.dependet}
-          />
-          <VictoryAxis dependentAxis
-            style={styles.independet}
-          />
-            
-          <VictoryLine
-
-            style={{data: {stroke: "tomato"}}}
-            data={arreglo}
-            
-            
-          />
+              style={{data: {stroke: "tomato"}}}
+              data={arreglo}
+              
+              
+            />
           </VictoryChart>)}
+        </div>
+        <div className="col-sm-3 comands">
+          <label>
+              Inicio:
+              <input name="init" type="date" value={date.init} onChange={handleInputChange} />
+            </label>
+            <br/>
+            <label>
+              Final:
+              <input name="end" type="date" value={date.end} onChange={handleInputChange} />
+            </label>
+            <br/>
+            <input onClick={sendData} type="submit" value="Submit" />
+        </div>
       </div>
-      
-    </React.Fragment>
+    </div>
   );
 }
 

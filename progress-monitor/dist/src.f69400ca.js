@@ -87001,10 +87001,12 @@ function App() {
       styles = _c[0],
       setStyles = _c[1];
 
-  var _d = React.useState( /*#__PURE__*/React.createElement(react_loading_1.default, {
+  var _d = React.useState( /*#__PURE__*/React.createElement("div", {
+    className: "loading"
+  }, /*#__PURE__*/React.createElement(react_loading_1.default, {
     type: "spinningBubbles",
     color: "#ffffff"
-  })),
+  }))),
       msg = _d[0],
       setMsg = _d[1];
 
@@ -87061,22 +87063,12 @@ function App() {
     });
   };
 
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", null, "Inicio:", /*#__PURE__*/React.createElement("input", {
-    name: "init",
-    type: "date",
-    value: date.init,
-    onChange: handleInputChange
-  })), /*#__PURE__*/React.createElement("label", null, "Final:", /*#__PURE__*/React.createElement("input", {
-    name: "end",
-    type: "date",
-    value: date.end,
-    onChange: handleInputChange
-  })), /*#__PURE__*/React.createElement("input", {
-    onClick: sendData,
-    type: "submit",
-    value: "Submit"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "grafico"
+  return /*#__PURE__*/React.createElement("div", {
+    className: "container-fluid gridContainer"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "col-sm-9 grafico"
   }, loading ? msg : /*#__PURE__*/React.createElement(victory_1.VictoryChart, {
     scale: {
       x: "time"
@@ -87094,6 +87086,22 @@ function App() {
       }
     },
     data: arreglo
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "col-sm-3 comands"
+  }, /*#__PURE__*/React.createElement("label", null, "Inicio:", /*#__PURE__*/React.createElement("input", {
+    name: "init",
+    type: "date",
+    value: date.init,
+    onChange: handleInputChange
+  })), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("label", null, "Final:", /*#__PURE__*/React.createElement("input", {
+    name: "end",
+    type: "date",
+    value: date.end,
+    onChange: handleInputChange
+  })), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("input", {
+    onClick: sendData,
+    type: "submit",
+    value: "Submit"
   }))));
 }
 
@@ -87337,7 +87345,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "34239" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "41103" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

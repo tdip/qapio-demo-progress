@@ -1,11 +1,29 @@
 $backColor: rgb(48, 54, 52);
+$generalText: white;
+
+@mixin centrar-vertical {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    text-align: center;
+}
 
 body{
     background: $backColor;
-    color: white;
+    color: $generalText;
 }
 
-.grafico{
-    width: 50%;
+.gridContainer{
+    height: 100%;
+}
+
+.loading{
+    top: auto;
+    bottom: auto;
     
+}
+
+.comands, .grafico{
+    @include centrar-vertical();
 }
