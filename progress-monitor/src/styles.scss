@@ -1,4 +1,6 @@
 $backColor: rgb(48, 54, 52);
+$baseColor: #cfdae0ff;
+$baseColor2: #60c3daff;
 $generalText: white;
 
 @mixin centrar-vertical {
@@ -21,9 +23,37 @@ body{
 .loading{
     top: auto;
     bottom: auto;
-    
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
 }
 
 .comands, .grafico{
     @include centrar-vertical();
+}
+
+.comands{
+    align-items: center;
+    button{
+        outline: none;
+        height: auto;
+        width: 80%;
+        border-radius: 40px;
+        background: none;
+        color: $baseColor2;
+        font-size: 1.5rem;
+        border: 2px solid $baseColor2;
+        transition: 0.3s;
+    }
+    button:hover{
+        width: 82%;
+        color: $baseColor;
+        transition: 0.3s;
+    }
+
+    input[type="date"]{
+        padding: 0 5px;
+        background: $baseColor2;
+    }
 }

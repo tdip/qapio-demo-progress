@@ -92,9 +92,11 @@ function App() {
             scale={{x: "time"}}
             containerComponent={<VictoryZoomContainer/>}
           >
-            <VictoryAxis
+            {arreglo.length <= 1 ? (<></>) : 
+            (<VictoryAxis
               style={styles.dependet}
-            />
+            />)
+            }
             <VictoryAxis dependentAxis
               style={styles.independet}
             />
@@ -103,23 +105,26 @@ function App() {
 
               style={{data: {stroke: "tomato"}}}
               data={arreglo}
-              
+              animate={{
+                duration: 2000,
+                onLoad: { duration: 1000 }
+              }}
               
             />
           </VictoryChart>)}
         </div>
         <div className="col-sm-3 comands">
           <label>
-              Inicio:
+              From<br/>
               <input name="init" type="date" value={date.init} onChange={handleInputChange} />
             </label>
-            <br/>
+            
             <label>
-              Final:
+              To<br/>
               <input name="end" type="date" value={date.end} onChange={handleInputChange} />
             </label>
             <br/>
-            <input onClick={sendData} type="submit" value="Submit" />
+            <button onClick={sendData} type="submit">Search</button>
         </div>
       </div>
     </div>

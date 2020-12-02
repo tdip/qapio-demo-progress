@@ -87074,7 +87074,7 @@ function App() {
       x: "time"
     },
     containerComponent: /*#__PURE__*/React.createElement(victory_1.VictoryZoomContainer, null)
-  }, /*#__PURE__*/React.createElement(victory_1.VictoryAxis, {
+  }, arreglo.length <= 1 ? /*#__PURE__*/React.createElement(React.Fragment, null) : /*#__PURE__*/React.createElement(victory_1.VictoryAxis, {
     style: styles.dependet
   }), /*#__PURE__*/React.createElement(victory_1.VictoryAxis, {
     dependentAxis: true,
@@ -87085,24 +87085,29 @@ function App() {
         stroke: "tomato"
       }
     },
-    data: arreglo
+    data: arreglo,
+    animate: {
+      duration: 2000,
+      onLoad: {
+        duration: 1000
+      }
+    }
   }))), /*#__PURE__*/React.createElement("div", {
     className: "col-sm-3 comands"
-  }, /*#__PURE__*/React.createElement("label", null, "Inicio:", /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "From", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("input", {
     name: "init",
     type: "date",
     value: date.init,
     onChange: handleInputChange
-  })), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("label", null, "Final:", /*#__PURE__*/React.createElement("input", {
+  })), /*#__PURE__*/React.createElement("label", null, "To", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("input", {
     name: "end",
     type: "date",
     value: date.end,
     onChange: handleInputChange
-  })), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("input", {
+  })), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("button", {
     onClick: sendData,
-    type: "submit",
-    value: "Submit"
-  }))));
+    type: "submit"
+  }, "Search"))));
 }
 
 exports.default = App;
@@ -87345,7 +87350,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "41103" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "34979" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
