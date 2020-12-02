@@ -20,12 +20,15 @@
   },
   "dependencies": {
     "@influxdata/influxdb-client": "^1.8.0",
+    "@types/react-sidebar": "^3.0.0",
     "bootstrap": "^4.5.3",
     "node-sass": "^5.0.0",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.0",
     "react-dom": "^17.0.1",
+    "react-icons": "^4.1.0",
     "react-loading": "^2.0.3",
+    "react-sidebar": "^3.0.2",
     "uuid": "^8.3.1",
     "victory": "^35.4.0"
   }
