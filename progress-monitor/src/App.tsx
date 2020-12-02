@@ -2,6 +2,8 @@
 import * as React from "react"
 import {getStyles} from './styles_Graphics'
 import { VictoryLine, VictoryChart, VictoryZoomContainer, VictoryAxis} from 'victory';
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.scss';
 
 const {InfluxDB} = require('@influxdata/influxdb-client')
@@ -20,7 +22,6 @@ function App() {
 
   const [date, setDate] = React.useState({init:"", end:""});
   const [arreglo, setArreglo] = React.useState<tabla[]>(temp);
-  const [datos, setDatos] = React.useState<tabla[]>([]);
   const [styles, setStyles] = React.useState(getStyles());
 
   
@@ -40,7 +41,7 @@ function App() {
       |> range(start: ${date.init}T00:00:00Z, stop: ${date.end}T23:59:00Z)
       |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
       |> filter(fn: (r) => r._field == "count")
-      `;
+      |> aggregateWindow(fn: mean, every: 5m)`;
 
     queryApi.queryRows(query, {
       next(row:any, tableMeta:any) {
@@ -48,7 +49,7 @@ function App() {
         var nume = parseFloat(`${o._value}`)
         var fecha = o._time;
         if(nume >= 0 || nume < 0){
-        temp.push({ x: new Date(fecha.toString()), y: nume})
+        setArreglo(arreglo => [...arreglo, { x: new Date(fecha.toString()), y: nume}])
       }
       },
       error(error:any) {
@@ -63,22 +64,18 @@ function App() {
     
   }
 
-  const handleSubmit = (event:ReactForm) => {
-    event.preventDefault();
+  const sendData = () => {
 
     if(date.init !== '' || date.end !== ''){
       dataInflux();
-      setArreglo(temp);
-      console.log("hola")
-      //setArreglo(dataInflux());
     }
     setDate({init:"", end:""})
-    setDatos(arreglo)
   }
+
 
   return (
     <React.Fragment>
-      <form onSubmit={handleSubmit}>
+      
         <label>
           Inicio:
           <input name="init" type="date" value={date.init} onChange={handleInputChange} />
@@ -87,8 +84,8 @@ function App() {
           Final:
           <input name="end" type="date" value={date.end} onChange={handleInputChange} />
         </label>
-        <input type="submit" value="Submit" />
-      </form>
+        <input onClick={sendData} type="submit" value="Submit" />
+    
 
       <div className="grafico">
 
@@ -106,7 +103,7 @@ function App() {
           <VictoryLine
 
             style={{data: {stroke: "tomato"}}}
-            data={datos}
+            data={arreglo}
             
             
           />
