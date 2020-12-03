@@ -10,7 +10,7 @@ import "./styles/styles.scss";
 
 const { InfluxDB } = require("@influxdata/influxdb-client");
 
-const token = "eq7dSOgd_afLSeNPXsmbh05BtT-YgSOavpv7up0dR4wpxV6QHNMIiQPfCaokprFL3mQqazQSmiq9NisyTlnPog==";
+const token = "RnFz0i1Y6T4DWjSKJycZ60OmIKdC6UijFfA3U0z1dfdI3-ZZHz-rXGh_CSt_VJ43gkQVsuctRkDj-L3Yu1IbWQ==";
 const org = "qapio";
 const bucket = "qapio";
 const client = new InfluxDB({ url: "http://localhost:8086", token: token });

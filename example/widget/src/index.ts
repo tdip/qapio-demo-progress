@@ -40,7 +40,7 @@ async function start() {
                     query: {
                         "url": "http://influx:8086",
                         "organization": "qapio",
-                        "token": 'eq7dSOgd_afLSeNPXsmbh05BtT-YgSOavpv7up0dR4wpxV6QHNMIiQPfCaokprFL3mQqazQSmiq9NisyTlnPog=='
+                        "token": 'RnFz0i1Y6T4DWjSKJycZ60OmIKdC6UijFfA3U0z1dfdI3-ZZHz-rXGh_CSt_VJ43gkQVsuctRkDj-L3Yu1IbWQ=='
                     }
                 }
             },
