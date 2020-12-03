@@ -122,7 +122,7 @@ function App() {
       setLoading(true);
       //dataInflux();
       console.log("llamada")
-      window.addEventListener('load', start);
+      addEventListener('load', start);
     }
     setDate({ init: "", end: "" });
   };
