@@ -103,7 +103,7 @@ async function start() {
             |> range(start: 2020-12-03T00:00:00Z, stop: 2020-12-03T23:59:00Z)
             |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
             |> filter(fn: (r) => r._field == "count")
-            |> aggregateWindow(fn: mean, every: 5m)
+            |> aggregateWindow(fn: last, every: 5m)
             `
         );
     };

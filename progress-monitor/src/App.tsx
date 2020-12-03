@@ -95,20 +95,20 @@ function App() {
 
         const values = JSON.parse(data.data);
         console.log("nom message")
-        console.log(values);
+        console.log((values.results[0].records.map(x => x.values)).map(x => x._time));
     };
 
     query.onopen = () => {
-        console.log("send")
-        query.send(
-            `
-            from(bucket: "qapio")
-            |> range(start: 2020-12-03T00:00:00Z, stop: 2020-12-03T23:59:00Z)
-            |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
-            |> filter(fn: (r) => r._field == "count")
-            |> aggregateWindow(fn: mean, every: 5m)
-            `
-        );
+
+      query.send(
+          `
+          from(bucket: "qapio")
+          |> range(start: 2020-12-03T00:00:00Z, stop: 2020-12-03T23:59:00Z)
+          |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
+          |> filter(fn: (r) => r._field == "count")
+          |> aggregateWindow(fn: last, every: 5m)
+          `
+      );
     };
 
 }
@@ -125,7 +125,6 @@ function App() {
       start();
       console.log("despues de llamada")
     }
-    setDate({ init: "", end: "" });
   };
 
   return (
