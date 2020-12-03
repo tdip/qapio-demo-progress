@@ -21,6 +21,7 @@
   "dependencies": {
     "@influxdata/influxdb-client": "^1.8.0",
     "@types/react-sidebar": "^3.0.0",
+    "@types/websocket": "^1.0.1",
     "bootstrap": "^4.5.3",
     "node-sass": "^5.0.0",
     "react": "^17.0.1",

@@ -44,38 +44,74 @@ function App() {
     });
   };
 
-  const dataInflux = () => {
-    const queryApi = client.getQueryApi(org);
+  async function start() {
 
-    const query = `from(bucket: "${bucket}")
-      |> range(start: ${date.init}T00:00:00Z, stop: ${date.end}T23:59:00Z)
-      |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
-      |> filter(fn: (r) => r._field == "count")
-      |> aggregateWindow(fn: mean, every: 5m)`;
+    const qapio = await import("./qapio");
 
-    queryApi.queryRows(query, {
-      next(row: any, tableMeta: any) {
-        const o = tableMeta.toObject(row);
-        var nume = parseFloat(`${o._value}`);
-        var fecha = o._time;
-        if (nume >= 0 || nume < 0) {
-          setArreglo((arreglo) => [
-            ...arreglo,
-            { x: new Date(fecha.toString()), y: nume },
-          ]);
-        }
-      },
-      error(error: any) {
-        console.error(error);
-        console.log("\\nFinished ERROR");
-        setMsg(<label>No results</label>);
-      },
-      complete() {
-        setLoading(false);
-        console.log("\\nFinished SUCCESS");
-      },
-    });
-  };
+    /*
+    Creates an instance to use the qapio API
+    */
+    const graphRunner = qapio.createGraphRunner();
+    const graph = await graphRunner.runGraph([{
+        nodes: {
+            query: {
+                selection: {
+                    interface: "Tdip.Qapio.Runtimes.Api.ProcessOutputStreamInterface"
+                }
+            },
+            influx: {
+                selection: {
+                    interface: "Tdip.Qapio.Services.InfluxDb.FluxQueryApi",
+                    query: {
+                        "url": "http://influx:8086",
+                        "organization": "qapio",
+                        "token": 'RnFz0i1Y6T4DWjSKJycZ60OmIKdC6UijFfA3U0z1dfdI3-ZZHz-rXGh_CSt_VJ43gkQVsuctRkDj-L3Yu1IbWQ=='
+                    }
+                }
+            },
+            result: {
+                selection: {
+                    interface: "Tdip.Qapio.Runtimes.Api.ProcessInputStreamInterface"
+                }
+            }
+        },
+        edges: [
+
+            {
+                from: "query",
+                to: "influx"
+            },
+
+            {
+                from: "influx",
+                to: "result"
+            }
+        ]
+    }]);
+    const query = graph.getStreamWebsocket('query');
+    const result = graph.getStreamWebsocket('result');
+
+    result.onmessage =  (data) => {
+
+        const values = JSON.parse(data.data);
+
+        console.log(values);
+    };
+
+    query.onopen = () => {
+
+        query.send(
+            `
+            from(bucket: "qapio")
+            |> range(start: 2020-12-03T00:00:00Z, stop: 2020-12-03T23:59:00Z)
+            |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
+            |> filter(fn: (r) => r._field == "count")
+            |> aggregateWindow(fn: mean, every: 5m)
+            `
+        );
+    };
+
+}
 
   function onSetSidebarOpen(open: boolean) {
     setSideBarState(open);
@@ -84,7 +120,8 @@ function App() {
   const sendData = () => {
     if (date.init !== "" || date.end !== "") {
       setLoading(true);
-      dataInflux();
+      //dataInflux();
+      window.addEventListener('load', start);
     }
     setDate({ init: "", end: "" });
   };
