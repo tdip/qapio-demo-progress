@@ -45,7 +45,7 @@ function App() {
   };
 
   async function start() {
-
+    console.log("start")
     const qapio = await import("./qapio");
 
     /*
@@ -94,12 +94,12 @@ function App() {
     result.onmessage =  (data) => {
 
         const values = JSON.parse(data.data);
-
+        console.log("nom message")
         console.log(values);
     };
 
     query.onopen = () => {
-
+        console.log("send")
         query.send(
             `
             from(bucket: "qapio")
@@ -121,6 +121,7 @@ function App() {
     if (date.init !== "" || date.end !== "") {
       setLoading(true);
       //dataInflux();
+      console.log("llamada")
       window.addEventListener('load', start);
     }
     setDate({ init: "", end: "" });
