@@ -122,7 +122,8 @@ function App() {
       setLoading(true);
       //dataInflux();
       console.log("llamada")
-      addEventListener('load', start);
+      start();
+      console.log("despues de llamada")
     }
     setDate({ init: "", end: "" });
   };
