@@ -4,6 +4,7 @@ $baseColor2: #60c3daff;
 $headerColor: #293742ff;
 $generalText: white;
 
+
 $headerLineHeight: 70px;
 
 @mixin centrar-vertical {
@@ -50,13 +51,17 @@ header {
 
 }
 
+.datePicker{
+    background: black;
+}
+
 .comands, .grafico{
     @include centrar-vertical();
 }
 
 .comands{
     align-items: center;
-    button{
+    #submit{
         outline: none;
         height: auto;
         width: 80%;
@@ -67,7 +72,7 @@ header {
         border: 2px solid $baseColor2;
         transition: 0.3s;
     }
-    button:hover{
+    #submit:hover{
         width: 82%;
         color: $baseColor;
         transition: 0.3s;

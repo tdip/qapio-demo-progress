@@ -49,6 +49,9 @@ header {
   width: 100%;
   height: 100%; }
 
+.datePicker {
+  background: black; }
+
 .comands, .grafico {
   display: flex;
   justify-content: center;
@@ -58,7 +61,7 @@ header {
 
 .comands {
   align-items: center; }
-  .comands button {
+  .comands #submit {
     outline: none;
     height: auto;
     width: 80%;
@@ -68,7 +71,7 @@ header {
     font-size: 1.5rem;
     border: 2px solid #60c3daff;
     transition: 0.3s; }
-  .comands button:hover {
+  .comands #submit:hover {
     width: 82%;
     color: #cfdae0ff;
     transition: 0.3s; }

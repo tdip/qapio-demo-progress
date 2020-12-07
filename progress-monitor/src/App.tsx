@@ -1,16 +1,19 @@
 import * as React from "react";
+
+import { Classes} from "@blueprintjs/core";
+
 import { getStyles } from "./styles/styles_Graphics";
-import {VictoryLine, VictoryChart, VictoryZoomContainer, VictoryAxis,} from "victory";
+import {VictoryLine, VictoryBar, VictoryChart, VictoryZoomContainer, VictoryAxis,} from "victory";
 import ReactLoading from "react-loading";
-import * as fa from "react-icons/fa";
-import Sidebar from "react-sidebar";
+import { DateRange, DateRangePicker } from "@blueprintjs/datetime";
+//import * as fa from "react-icons/fa";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/styles.scss";
 
 const { InfluxDB } = require("@influxdata/influxdb-client");
 
-const token = "RnFz0i1Y6T4DWjSKJycZ60OmIKdC6UijFfA3U0z1dfdI3-ZZHz-rXGh_CSt_VJ43gkQVsuctRkDj-L3Yu1IbWQ==";
+const token = "TV5r7CtALtoRh8JnTAfH-fsF-ByvIpz2cWibe0ElhK_ou-WO6PTD_xn95RkSzh4T3DVxyE14TCUukCzl8d60cQ==";
 const org = "qapio";
 const bucket = "qapio";
 const client = new InfluxDB({ url: "http://localhost:8086", token: token });
@@ -26,6 +29,7 @@ function App() {
   var temp: tabla[] = [];
 
   const [date, setDate] = React.useState({ init: "", end: "" });
+  const [dateRange, setDateRange] = React.useState([null, null]);
   const [arreglo, setArreglo] = React.useState<tabla[]>(temp);
   const [styles, setStyles] = React.useState(getStyles());
   const [msg, setMsg] = React.useState(
@@ -34,7 +38,6 @@ function App() {
     </div>
   );
   const [loading, setLoading] = React.useState(false);
-  const [sideBarState, setSideBarState] = React.useState(false);
 
   const handleInputChange = (event: ReactFormInput) => {
     const element = event.target as HTMLInputElement;
@@ -44,131 +47,77 @@ function App() {
     });
   };
 
-  async function start() {
-    console.log("start")
-    const qapio = await import("./qapio");
+  const dataInflux = () => {
+    const queryApi = client.getQueryApi(org);
 
-    /*
-    Creates an instance to use the qapio API
-    */
-    const graphRunner = qapio.createGraphRunner();
-    const graph = await graphRunner.runGraph([{
-        nodes: {
-            query: {
-                selection: {
-                    interface: "Tdip.Qapio.Runtimes.Api.ProcessOutputStreamInterface"
-                }
-            },
-            influx: {
-                selection: {
-                    interface: "Tdip.Qapio.Services.InfluxDb.FluxQueryApi",
-                    query: {
-                        "url": "http://influx:8086",
-                        "organization": "qapio",
-                        "token": 'RnFz0i1Y6T4DWjSKJycZ60OmIKdC6UijFfA3U0z1dfdI3-ZZHz-rXGh_CSt_VJ43gkQVsuctRkDj-L3Yu1IbWQ=='
-                    }
-                }
-            },
-            result: {
-                selection: {
-                    interface: "Tdip.Qapio.Runtimes.Api.ProcessInputStreamInterface"
-                }
-            }
-        },
-        edges: [
+    const query = `from(bucket: "${bucket}")
+      |> range(start: ${date.init}T00:00:00Z, stop: ${date.end}T23:59:00Z)
+      |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
+      |> filter(fn: (r) => r._field == "count")
+      |> aggregateWindow(fn: mean, every: 12h)
+      `;
 
-            {
-                from: "query",
-                to: "influx"
-            },
-
-            {
-                from: "influx",
-                to: "result"
-            }
-        ]
-    }]);
-    const query = graph.getStreamWebsocket('query');
-    const result = graph.getStreamWebsocket('result');
-
-    result.onmessage =  (data) => {
-
-        const values = JSON.parse(data.data);
-        console.log("nom message")
-        console.log((values.results[0].records.map(x => x.values)).map(x => x._time));
-    };
-
-    query.onopen = () => {
-
-      query.send(
-          `
-          from(bucket: "qapio")
-          |> range(start: 2020-12-03T00:00:00Z, stop: 2020-12-03T23:59:00Z)
-          |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
-          |> filter(fn: (r) => r._field == "count")
-          |> aggregateWindow(fn: last, every: 5m)
-          `
-      );
-    };
-
-}
-
-  function onSetSidebarOpen(open: boolean) {
-    setSideBarState(open);
-  }
+    queryApi.queryRows(query, {
+      next(row: any, tableMeta: any) {
+        const o = tableMeta.toObject(row);
+        var nume = parseFloat(`${o._value}`);
+        var fecha = o._time;
+        if (nume >= 0 || nume < 0) {
+          setArreglo((arreglo) => [
+            ...arreglo,
+            { x: new Date(fecha.toString()), y: nume },
+          ]);
+        }
+      },
+      error(error: any) {
+        console.error(error);
+        console.log("\\nFinished ERROR");
+        setMsg(<label>No results</label>);
+      },
+      complete() {
+        setLoading(false);
+        console.log("\\nFinished SUCCESS");
+      },
+    });
+  };
 
   const sendData = () => {
     if (date.init !== "" || date.end !== "") {
       setLoading(true);
-      //dataInflux();
-      console.log("llamada")
-      start();
-      console.log("despues de llamada")
+      dataInflux();
     }
   };
 
+  const handleDateChange = (dateRange: DateRange) => setDateRange( dateRange );
+
+  function dateToString(date: Date, option = false){
+    var year = (date.getFullYear()).toString();
+    var month = (date.getMonth() + 1).toString();
+    var day = (date.getDate()).toString();
+
+    if(option){
+      return year + "-" + month + "-" + day;
+    }else{
+      return day + "/" + month + "/" + year;
+    }
+  }
+
   return (
-    <Sidebar
-      sidebar={<b>qapio</b>}
-      open={sideBarState}
-      onSetOpen={onSetSidebarOpen}
-      styles={styles.sideBar}
-    >
+    <React.Fragment>
       <header id="header">
-        <button id="openSideBar" onClick={() => onSetSidebarOpen(true)}>
-          <fa.FaBars />
-        </button>
       </header>
 
       <div className="container-fluid gridContainer">
         <div className="row">
-          <div className="col-sm-9 grafico">
-            {loading ? (
-              msg
-            ) : (
-              <VictoryChart
-                scale={{ x: "time" }}
-                containerComponent={<VictoryZoomContainer />}
-              >
-                {arreglo.length <= 1 ? (
-                  <></>
-                ) : (
-                  <VictoryAxis style={styles.dependet} />
-                )}
-                <VictoryAxis dependentAxis style={styles.independet} />
+        <aside className="col-sm-3 comands">
+        <div className={Classes.DARK}>
+        <DateRangePicker
+        shortcuts={false}
+        singleMonthOnly={true}
+        className="datePiker"
+        onChange={handleDateChange}
 
-                <VictoryLine
-                  style={{ data: { stroke: "tomato" } }}
-                  data={arreglo}
-                  animate={{
-                    duration: 2000,
-                    onLoad: { duration: 1000 },
-                  }}
-                />
-              </VictoryChart>
-            )}
-          </div>
-          <div className="col-sm-3 comands">
+/></div>
             <label>
               From
               <br />
@@ -191,13 +140,49 @@ function App() {
               />
             </label>
             <br />
-            <button onClick={sendData} type="submit">
+            <button id="submit" onClick={sendData} type="submit">
               Search
             </button>
+          </aside>
+          <div className="col-sm-9 grafico">
+            {loading ? (
+              msg
+            ) : (
+              <VictoryChart
+              height={200} width={400}
+          domainPadding={20}
+        >
+
+          <VictoryAxis
+            style={styles.dependet}
+            standalone={false}
+            tickValues={arreglo.map(x => x.x)}
+            tickFormat={arreglo.map(x => dateToString(x.x)}
+            
+            //tickFormat={(x) => new Date(x).getFullYear()}
+            
+          />
+          <VictoryAxis
+            dependentAxis
+            standalone={false}
+            style={styles.independet}
+            tickFormat={(x) => (x)}
+          />
+          <VictoryBar
+            barWidth={20}
+            standalone={false}
+            data={arreglo}
+            x="x"
+            y="y"
+            labels={arreglo.map(x => parseInt(x.y))}
+            style={{ data: { fill: "#4472c3ff"}}}
+          />
+        </VictoryChart>
+            )}
           </div>
         </div>
       </div>
-    </Sidebar>
+    </React.Fragment>
   );
 }
 
