@@ -51,7 +51,7 @@ function App() {
     const queryApi = client.getQueryApi(org);
 
     const query = `from(bucket: "${bucket}")
-      |> range(start: ${date.init}T00:00:00Z, stop: ${date.end}T23:59:00Z)
+      |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
       |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
       |> filter(fn: (r) => r._field == "count")
       |> aggregateWindow(fn: mean, every: 12h)
@@ -82,7 +82,7 @@ function App() {
   };
 
   const sendData = () => {
-    if (date.init !== "" || date.end !== "") {
+    if (dateRange[0] !== null || dateRange !== null) {
       setLoading(true);
       dataInflux();
     }
