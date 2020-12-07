@@ -1,0 +1,9 @@
+{
+  "id": "pivot-table",
+  "types": [
+    "http-static-server"
+  ],
+  "http-static-server": {
+    "www-public": "dist"
+  }
+}
