@@ -15,6 +15,11 @@ $headerLineHeight: 70px;
     text-align: center;
 }
 
+@mixin size($h, $w) {
+    height: $h;
+    width: $w;
+}
+
 body{
     background: $backColor;
     color: $generalText;
@@ -24,8 +29,7 @@ header {
     top: 0%;
     left: 0%;
     background: $headerColor;
-    width: 100%;
-    height: $headerLineHeight;
+    @include size($headerLineHeight, 100%);
     color: white;
     line-height: $headerLineHeight;
 
@@ -38,33 +42,32 @@ header {
         font-size: 1.5rem;
     }
 }
+
 .gridContainer{
-    height: 100%;
+    margin-top: 50px;
 }
 
 .loading{
-    top: auto;
-    bottom: auto;
-    position: absolute;
-    width: 100%;
-    height: 100%;
+    height: 400px;
+    .bubble{
+        margin: auto;
+    }
 
 }
 
-.datePicker{
-    background: black;
-}
-
-.comands, .grafico{
+.comands, .grafico, .loading{
     @include centrar-vertical();
+}
+
+.grafico{
+    height: 400px;
 }
 
 .comands{
     align-items: center;
     #submit{
         outline: none;
-        height: auto;
-        width: 80%;
+        @include size(auto, 80%);
         border-radius: 40px;
         background: none;
         color: $baseColor2;
@@ -81,5 +84,26 @@ header {
     input[type="date"]{
         padding: 0 5px;
         background: $baseColor2;
+    }
+}
+
+.selectFactor{
+    outline: none;
+    margin-bottom: 15px;
+    background: $baseColor;
+    border-radius: 7px;
+    color: black;
+    @include size(35px, 85%);
+    font-size: 1.1rem;
+    .option{
+        text-align: center;
+        align-items: center;
+        background: $baseColor;
+        color: black;
+    }
+    .option:hover{
+        background: $baseColor2;
+        color: white;
+        
     }
 }

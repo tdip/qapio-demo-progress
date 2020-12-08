@@ -6,11 +6,7 @@ export function getStyles() {
   const BLUE_BARS = "#4472c3ff";
     return {
       parent: {
-        background: "transparent",
-        boxSizing: "border-box",
-        display: "inline",
         padding: 0,
-        fontFamily: "'Fira Sans', sans-serif"
       },
       // X
       dependet: {
@@ -22,7 +18,7 @@ export function getStyles() {
           padding: 25,
           fill: "white",
           fontFamily: "inherit",
-          fontSize: 9,
+          fontSize: 10,
           angle: -90
         }
       },

@@ -27,7 +27,7 @@ function App() {
   const [styles, setStyles] = React.useState(getStyles());
   const [msg, setMsg] = React.useState(
     <div className="loading">
-      <ReactLoading type="spinningBubbles" color="#ffffff" />
+      <ReactLoading className="bubble" type="spinningBubbles" color="#ffffff" />
     </div>
   );
   const [loading, setLoading] = React.useState(false);
@@ -77,6 +77,7 @@ function App() {
   const sendData = () => {
     if (dateRange[0] !== null || dateRange !== null) {
       setLoading(true);
+      setArreglo([]);
       dataInflux();
     }
   };
@@ -100,6 +101,8 @@ function App() {
     }
   }
 
+  const formatBar = arreglo.map(x => dateToString(x.x));
+
   return (
     <React.Fragment>
       <header id="header">
@@ -107,38 +110,46 @@ function App() {
 
       <div className="container-fluid gridContainer">
         <div className="row">
-        <aside className="col-sm-3 comands">
-        <div className={Classes.DARK}>
-        <DateRangePicker
-        shortcuts={false}
-        singleMonthOnly={true}
-        className="datePiker"
-        onChange={handleDateChange}
 
-          /></div>
+          <aside className="col-md-3 comands">
+            <br/>
+            <select className="selectFactor" >
+              <option >Select Factor</option>
+              <option >prueba</option>
+              <option >prueba</option>
+            </select>
+            
+            <br></br>
+            <div className={Classes.DARK}>
+            <div className={Classes.ELEVATION_1}>
+              <DateRangePicker
+              shortcuts={false}
+              singleMonthOnly={true}
+              onChange={handleDateChange}
+              />
+            </div></div>
            
             <br />
             <button id="submit" onClick={sendData} type="submit">
               Search
             </button>
           </aside>
-          <div className="col-sm-9 grafico">
+
+          <div className="col-md-9 grafico">
             {loading ? (
               msg
             ) : (
               <VictoryChart
-              height={200} width={400}
-          domainPadding={20}
+              height={300} width={700}
+              domainPadding={20}
+              padding={{ top: 20, bottom: 50, left: 35, right: 15 }}
         >
 
           <VictoryAxis
             style={styles.dependet}
             standalone={false}
             tickValues={arreglo.map(x => x.x)}
-            tickFormat={arreglo.map(x => dateToString(x.x)}
-            
-            //tickFormat={(x) => new Date(x).getFullYear()}
-            
+            tickFormat={formatBar}
           />
           <VictoryAxis
             dependentAxis
@@ -157,6 +168,10 @@ function App() {
           />
         </VictoryChart>
             )}
+            <br></br>
+            <select>
+              <option>hola</option>
+            </select>
           </div>
         </div>
       </div>
