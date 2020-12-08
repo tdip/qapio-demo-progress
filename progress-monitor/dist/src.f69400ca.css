@@ -77,23 +77,29 @@ header {
     padding: 0 5px;
     background: #60c3daff; }
 
-.selectFactor {
+.selectFactor, .selectEquid {
   outline: none;
   margin-bottom: 15px;
   background: #cfdae0ff;
   border-radius: 7px;
   color: black;
-  height: 35px;
-  width: 85%;
   font-size: 1.1rem; }
-  .selectFactor .option {
+  .selectFactor .option, .selectEquid .option {
     text-align: center;
     align-items: center;
     background: #cfdae0ff;
     color: black; }
-  .selectFactor .option:hover {
+  .selectFactor .option:hover, .selectEquid .option:hover {
     background: #60c3daff;
     color: white; }
+
+.selectFactor {
+  height: 35px;
+  width: 85%; }
+
+.selectEquid {
+  height: 35px;
+  width: auto; }
 
 
 /*# sourceMappingURL=/src.f69400ca.css.map */

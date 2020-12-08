@@ -18,6 +18,7 @@ const client = new InfluxDB({ url: "http://localhost:8086", token: token });
 
 interface tabla {x: Date; y: number;}
 type ReactFormInput = React.FormEvent<HTMLInputElement>;
+type ReactFormSelect = React.FormEvent<HTMLSelectElement>;
 
 function App() {
 
@@ -31,6 +32,18 @@ function App() {
     </div>
   );
   const [loading, setLoading] = React.useState(false);
+  const [equidList, setEquid] = React.useState([]);
+  const [factorList, setFactor] = React.useState([]);
+  const [info, setInfo] = React.useState({factor: "", measur: ""})
+
+  
+
+  const queryResults = `from(bucket: "${bucket}")
+      |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
+      |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
+      |> filter(fn: (r) => r._field == "count")
+      |> aggregateWindow(fn: mean, every: 24h)
+      `;
 
   const handleInputChange = (event: ReactFormInput) => {
     const element = event.target as HTMLInputElement;
@@ -40,32 +53,73 @@ function App() {
     });
   };
 
-  const dataInflux = () => {
-    const queryApi = client.getQueryApi(org);
-
-    const query = `from(bucket: "${bucket}")
+  const handleSelect = (event: ReactFormSelect) => {
+    const element = event.target as HTMLSelectElement;
+    if(element.value !== ""){
+    const queryEquid = `from(bucket: "${bucket}")
       |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
-      |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
-      |> filter(fn: (r) => r._field == "count")
-      |> aggregateWindow(fn: mean, every: 24h)
+        |> filter(fn: (r) => r._field == "${element.value}")
+        |> columns()
+        |> keep(columns: ["_measurement"])
+        |> group(columns: ["_measurement"])
+        |> distinct()
       `;
+    dataInflux(queryEquid, 3);
+    setArreglo([])
+    setInfo({factor: element.value, measur: ""})
+    }
+  }
+
+  const handleMeasurement = (event: ReactFormSelect) => {
+    const element = event.target as HTMLSelectElement;
+    if(element.value !== ""){
+      setArreglo([])
+    const queryEquid = `from(bucket: "${bucket}")
+      |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
+        |> filter(fn: (r) => r._measurement == "${element.value}")
+        |> filter(fn: (r) => r._field == "${info.factor}")
+        |> aggregateWindow(fn: mean, every: 24h)
+      `;
+      setLoading(true)
+    dataInflux(queryEquid, 1);
+    
+    setInfo({factor: info.factor, measur: element.value})
+    }
+  }
+
+  const dataInflux = (query:string, option: number) => {
+    const queryApi = client.getQueryApi(org);
 
     queryApi.queryRows(query, {
       next(row: any, tableMeta: any) {
         const o = tableMeta.toObject(row);
-        var nume = parseFloat(`${o._value}`);
-        var fecha = o._time;
-        if (nume >= 0 || nume < 0) {
-          setArreglo((arreglo) => [
-            ...arreglo,
-            { x: new Date(fecha.toString()), y: nume },
-          ]);
-        }
+        switch(option){
+          case 1:
+            var nume = parseFloat(`${o._value}`);
+            var fecha = o._time;
+            if (nume >= 0 || nume < 0) {
+              setArreglo((arreglo) => [
+                ...arreglo,
+                { x: new Date(fecha.toString()), y: nume },
+              ]);
+            }
+            break;
+
+            case 2:
+              setFactor((factorList) => [...factorList, o._field])
+            break;
+
+            case 3:
+              setEquid((equidList) => [...equidList, o._measurement])
+            break;
+
+          default:
+            console.log("error")
+          }
       },
       error(error: any) {
         console.error(error);
         console.log("\\nFinished ERROR");
-        setMsg(<label>No results</label>);
       },
       complete() {
         setLoading(false);
@@ -78,22 +132,34 @@ function App() {
     if (dateRange[0] !== null || dateRange !== null) {
       setLoading(true);
       setArreglo([]);
-      dataInflux();
+      dataInflux(queryResults, 1);
     }
   };
 
-  const handleDateChange = (dateRange: DateRange) => setDateRange( dateRange );
+  const handleDateChange = (dateRange: DateRange) => {
+    setDateRange( dateRange );
+    if(dateRange[0] !== null && dateRange[1] !== null){
+      setFactor([])
+      var queryFactorList = `from(bucket: "qapio") 
+        |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
+        |> columns()
+        |> keep(columns: ["_field"])
+        |> group(columns: ["_field"])
+        |> distinct()`
+      dataInflux(queryFactorList, 2);
+  }
+  };
 
   function dateToString(date: Date, option = false){
     var year = (date.getFullYear()).toString();
     var month = (date.getMonth() + 1).toString();
+
     if(date.getDate() <= 9){
       var day = "0" + (date.getDate()).toString();
     }else{
       var day = (date.getDate()).toString();
     }
     
-
     if(option){
       return (year + "-" + month + "-" + day).toString();
     }else{
@@ -105,6 +171,7 @@ function App() {
 
   return (
     <React.Fragment>
+     {console.log(factorList)}
       <header id="header">
       </header>
 
@@ -113,21 +180,19 @@ function App() {
 
           <aside className="col-md-3 comands">
             <br/>
-            <select className="selectFactor" >
-              <option >Select Factor</option>
-              <option >prueba</option>
-              <option >prueba</option>
+            <select className="selectFactor" onChange={handleSelect}>
+              <option key={0} value="">Select Factor</option>
+              {factorList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
             </select>
             
-            <br></br>
+            <br/>
             <div className={Classes.DARK}>
-            <div className={Classes.ELEVATION_1}>
               <DateRangePicker
               shortcuts={false}
               singleMonthOnly={true}
               onChange={handleDateChange}
               />
-            </div></div>
+            </div>
            
             <br />
             <button id="submit" onClick={sendData} type="submit">
@@ -135,7 +200,12 @@ function App() {
             </button>
           </aside>
 
-          <div className="col-md-9 grafico">
+          <div className="col-md-9">
+            <div>
+              <h1>{info.factor}</h1><br/>
+              <h2>{info.measur}</h2><br/>
+            </div>
+            <div className="grafico">
             {loading ? (
               msg
             ) : (
@@ -169,8 +239,14 @@ function App() {
         </VictoryChart>
             )}
             <br></br>
-            <select>
-              <option>hola</option>
+            </div>
+            <select className="selectEquid" onChange={handleMeasurement}>
+              <option key={0} value="">Equidad</option>
+              {equidList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
+            </select>
+           
+            <select >
+              <option>Graphic</option>
             </select>
           </div>
         </div>
