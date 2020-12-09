@@ -261,7 +261,7 @@ function App() {
           <aside className="col-sm-3 comands">
             <div className="factor">
               <select className="selectFactor" onChange={handleSelect} disabled={loading.factor} value={info.factor}>
-                <option key={0} value="">Select Factor</option>
+                <option key={0} value="">Factor</option>
                 {factorList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
               </select>
               {loading.factor ? (<ReactLoading className="charge" height={20} width={40} type="bubbles" color="#ffffff" />) : (<></>)}
@@ -297,15 +297,15 @@ function App() {
             <article className="graphicOption">
               <div id="selectMeasurement">
               <select className="selectEquid" onChange={handleMeasurement} disabled={loading.measurement} value={info.measur}>
-                <option key={0} value="">Equidad</option>
+                <option key={0} value="">Measurement</option>
                 {equidList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
               </select>
               {loading.measurement ? (<ReactLoading className="charge" height={20} width={40} type="bubbles" color="#ffffff" />) : (<></>)}
               </div>
               <div id="selectGraphic">
                 <select className="selectGraphic" onChange={handleChangeGraphic} value={info.graphic}>
-                  <option value="bars">Bars</option>
-                  <option value="line" disabled={arreglo.length <= 0 ? true : false}>Line</option>
+                  <option value="bars">Bar Graphic</option>
+                  <option value="line" disabled={arreglo.length <= 0 ? true : false}>Line Graphic</option>
                 </select>
               </div>
             </article>
