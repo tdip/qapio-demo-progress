@@ -2,7 +2,7 @@ import * as React from "react";
 
 import logo from './logo.svg';
 
-import {VictoryLine, VictoryBar, VictoryChart, VictoryZoomContainer, VictoryLabel, VictoryAxis} from "victory";
+import {VictoryLine, VictoryBar, VictoryChart, VictoryZoomContainer, VictoryVoronoiContainer, VictoryAxis, VictoryTooltip} from "victory";
 import ReactLoading from "react-loading";
 import { DateRange, DateRangePicker } from "@blueprintjs/datetime";
 import { Classes} from "@blueprintjs/core";
@@ -24,36 +24,33 @@ type ReactFormSelect = React.FormEvent<HTMLSelectElement>;
 
 function App() {
 
-  const [date, setDate] = React.useState({ init: "", end: "" });
   const [dateRange, setDateRange] = React.useState([null, null]);
   const [arreglo, setArreglo] = React.useState<tabla[]>([]);
   const [styles, setStyles] = React.useState(getStyles());
+  const [loading, setLoading] = React.useState({graphic:false, factor:false, measurement:false});
+  const [equidList, setEquid] = React.useState([]);
+  const [factorList, setFactor] = React.useState([]);
+  const [info, setInfo] = React.useState({factor: "", measur: "", graphic: "bars"})
   const [msg, setMsg] = React.useState(
     <div className="loading">
       <ReactLoading className="charge" type="spinningBubbles" color="#ffffff"/>
     </div>
   );
-  const [loading, setLoading] = React.useState({graphic:false, factor:false, measurement:false});
-  const [equidList, setEquid] = React.useState([]);
-  const [factorList, setFactor] = React.useState([]);
-  const [info, setInfo] = React.useState({factor: "", measur: ""})
+  const tooltip = (
+  <VictoryTooltip
+  flyoutStyle={{
+    stroke: "none", fill:"#1e1e1eff"}}
+  />)
 
-  
-
-  const handleInputChange = (event: ReactFormInput) => {
-    const element = event.target as HTMLInputElement;
-    setDate({
-      ...date,
-      [element.name]: element.value,
-    });
-  };
-
-  //FACTOR'S LIST
+  //CREATE FACTOR'S LIST -- Selection range date
   const handleDateChange = (dateRange: DateRange) => {
     setDateRange( dateRange );
+    setInfo({factor: "", measur:"", graphic: info.graphic})
+    setArreglo([]);
     if(dateRange[0] !== null && dateRange[1] !== null){
       setFactor([]);
       setEquid([]);
+      
       var queryFactorList = `from(bucket: "qapio") 
         |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
         |> columns()
@@ -65,7 +62,7 @@ function App() {
     }
   };
 
-  //MEASUREMENTE LIST
+  //CREATE MEASUREMENTE LIST -- Selecting a Factor
   const handleSelect = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
     if(element.value !== ""){
@@ -80,11 +77,11 @@ function App() {
       `;
     dataInflux(queryEquid, 3);
     setArreglo([])
-    setInfo({factor: element.value, measur: ""})
+    setInfo({factor: element.value, measur: "", graphic: info.graphic})
     }
   }
 
-  //GRAPHIC
+  //GET DATE FOR GRAPHIC -- selecting a measurement
   const handleMeasurement = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
     if(element.value !== ""){
@@ -98,12 +95,14 @@ function App() {
     setLoading({graphic:true, factor:false, measurement:false})
     dataInflux(queryEquid, 1);
     
-    setInfo({factor: info.factor, measur: element.value})
+    setInfo({factor: info.factor, measur: element.value, graphic:info.graphic})
     }
   }
 
+  //Change graphic's type
   const handleChangeGraphic = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
+    setInfo({factor: info.factor, measur: info.measur, graphic: element.value})
     if(element.value !== ""){
       if(element.value === "bars"){
         setGraphic(defaultGraphic);
@@ -154,6 +153,7 @@ function App() {
     });
   };
 
+  //create a string date to send influx
   function dateToString(date: Date, option = false){
     var year = (date.getFullYear()).toString();
     var month = (date.getMonth() + 1).toString();
@@ -171,6 +171,7 @@ function App() {
     }
   }
 
+  //VictoryBars
   const defaultGraphic = (
     <VictoryChart
       height={300} width={700}
@@ -179,19 +180,19 @@ function App() {
     >
 
       <VictoryAxis
-        style={styles.dependet}
+        style={styles.independent}
         tickValues={arreglo.map(x => x.x)}
         tickFormat={arreglo.map(x => x.x.toLocaleDateString())}
       />
       <VictoryAxis
         dependentAxis
-        style={styles.independet}
-        tickFormat={(x) => (x)}
+        style={arreglo.length >= 1 ? styles.dependent : styles.dependentNull}
       />
       <VictoryBar
+        labelComponent={tooltip}
         data={arreglo}
-        labels={arreglo.map(x => parseInt((x.y).toString()))}
-        style={{ data: { fill: "#4472c3ff"}}}
+        labels={arreglo.map(x => (x.y).toFixed(2))}
+        style={styles.bars}
         animate={{
           duration: 2000,
           onLoad: { duration: 1000 }
@@ -199,33 +200,51 @@ function App() {
       />
     </VictoryChart>
   )
-
+  
+  //victoryLine
   const lineGraphic = (
     <VictoryChart
       scale={{ x: "time" }}
       height={300} width={700}
       padding={{ top: 10, bottom: 55, left: 35, right: 15 }}
-      containerComponent={<VictoryZoomContainer />}
+      containerComponent={<VictoryVoronoiContainer/>}
     >
       {arreglo.length <= 1 ? (
         <></>
       ) : (
-        <VictoryAxis style={styles.dependet} />
+        <VictoryAxis style={styles.independent} />
       )}
-      <VictoryAxis dependentAxis style={styles.independet} />
+      <VictoryAxis dependentAxis 
+      style={arreglo.length >= 1 ? styles.dependent : styles.dependentNull}/>
 
       <VictoryLine
-        style={{ data: { stroke: "tomato" } }}
+      
+        labelComponent={tooltip}
+        style={styles.line}
         data={arreglo}
+        labels={arreglo.map(x => (x.y).toFixed(2))}
         animate={{
           duration: 2000,
           onLoad: { duration: 1000 },
         }}
+        
       />
     </VictoryChart>
   )
 
   const [graphic, setGraphic] = React.useState(defaultGraphic)
+
+  React.useEffect(() => {
+    if(info.graphic === "bars"){
+      setGraphic(defaultGraphic);
+    }
+    if(info.graphic === "line" && arreglo.length > 1){
+      setGraphic(lineGraphic);
+    }else{
+      setGraphic(defaultGraphic);
+      setInfo({factor: info.factor, measur: info.measur, graphic: "bars"})
+    }
+  }, [arreglo])
 
   return (
     <React.Fragment>
@@ -241,7 +260,7 @@ function App() {
 
           <aside className="col-sm-3 comands">
             <div className="factor">
-              <select className="selectFactor" onChange={handleSelect}>
+              <select className="selectFactor" onChange={handleSelect} disabled={loading.factor} value={info.factor}>
                 <option key={0} value="">Select Factor</option>
                 {factorList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
               </select>
@@ -277,16 +296,16 @@ function App() {
 
             <article className="graphicOption">
               <div id="selectMeasurement">
-              <select className="selectEquid" onChange={handleMeasurement}>
+              <select className="selectEquid" onChange={handleMeasurement} disabled={loading.measurement} value={info.measur}>
                 <option key={0} value="">Equidad</option>
                 {equidList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
               </select>
               {loading.measurement ? (<ReactLoading className="charge" height={20} width={40} type="bubbles" color="#ffffff" />) : (<></>)}
               </div>
               <div id="selectGraphic">
-                <select className="selectGraphic" onChange={handleChangeGraphic}>
+                <select className="selectGraphic" onChange={handleChangeGraphic} value={info.graphic}>
                   <option value="bars">Bars</option>
-                  <option value="line">Line</option>
+                  <option value="line" disabled={arreglo.length <= 0 ? true : false}>Line</option>
                 </select>
               </div>
             </article>

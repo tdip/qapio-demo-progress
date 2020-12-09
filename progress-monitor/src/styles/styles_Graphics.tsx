@@ -4,12 +4,10 @@ export function getStyles() {
 
   const BLUE_BAR = "#cfdae0ff";
   const BLUE_BARS = "#4472c3ff";
+  const TOOLTIP  = "#1e1e1eff";
     return {
-      parent: {
-        padding: 0,
-      },
       // X
-      dependet: {
+      independent: {
         grid: { strokeWidth: 0},
 
         axis: { stroke: "white", strokeWidth: 1},
@@ -24,7 +22,7 @@ export function getStyles() {
       },
 
       // Y
-      independet: {
+      dependent: {
         grid: {
           stroke: "#ffffff",
           strokeWidth: 0.7
@@ -38,12 +36,29 @@ export function getStyles() {
         }
       },
 
-      labelOne: {
-        fill: "#ffffff",
-        fontFamily: "inherit",
-        fontSize: 12,
-        fontStyle: "italic"
+      dependentNull: {
+        grid: {
+          stroke: "#ffffff",
+          strokeWidth: 0.7
+        },
+        axis: { stroke: "#ffffff", strokeWidth: 0 },
+        ticks: { strokeWidth: 0 },
+        tickLabels: {
+          fill: "#ffffff",
+          fontFamily: "inherit",
+          fontSize: 0
+        }
       },
+
+      line: { 
+        data: { stroke: "#4472c3ff" },
+        labels: {fill:"#cfdae0ff"}
+      },
+
+      bars: {
+        data: { fill: "#4472c3ff"},
+        labels: {fill:"#cfdae0ff"}
+      }
     };
   }
 
