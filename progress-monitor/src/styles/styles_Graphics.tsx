@@ -18,7 +18,7 @@ export function getStyles() {
           padding: 25,
           fill: "white",
           fontFamily: "inherit",
-          fontSize: 10,
+          fontSize: 12,
           angle: -90
         }
       },
@@ -38,9 +38,12 @@ export function getStyles() {
         }
       },
 
-      sideBar: {
-        sidebar: { background: BLUE_BARS }
-      }
+      labelOne: {
+        fill: "#ffffff",
+        fontFamily: "inherit",
+        fontSize: 12,
+        fontStyle: "italic"
+      },
     };
   }
 

@@ -2,7 +2,7 @@ $backColor: rgb(48, 54, 52);
 $baseColor: #cfdae0ff;
 $baseColor2: #60c3daff;
 $headerColor: #293742ff;
-$generalText: white;
+$generalText: #e1e8edff;
 
 
 $headerLineHeight: 70px;
@@ -32,7 +32,7 @@ header {
     @include size($headerLineHeight, 100%);
     color: white;
     line-height: $headerLineHeight;
-
+    filter: drop-shadow(0px 2px 5px rgb(0, 0, 0));
     #openSideBar{
         background: none;
         color: white;
@@ -41,18 +41,29 @@ header {
         margin: 0 7px;
         font-size: 1.5rem;
     }
+    .logo {
+        float: left;
+        width: auto;
+        height: $headerLineHeight;
+        text-align: center;
+        margin: 0 15px;
+        img {
+            padding: 1px;
+            height: $headerLineHeight - 15px;
+        }
+    }
 }
 
 .gridContainer{
-    margin-top: 50px;
+    margin-top: 10px;
 }
 
-.loading{
-    height: 400px;
-    .bubble{
-        margin: auto;
+.information{
+    height: 100px;
+    h4{
+        text-align: right;
+        bottom: 0;
     }
-
 }
 
 .comands, .grafico, .loading{
@@ -65,36 +76,34 @@ header {
 
 .comands{
     align-items: center;
-    #submit{
-        outline: none;
-        @include size(auto, 80%);
-        border-radius: 40px;
-        background: none;
-        color: $baseColor2;
-        font-size: 1.5rem;
-        border: 2px solid $baseColor2;
-        transition: 0.3s;
+    .factor{
+        width: 90%;
+        display: inline;
     }
-    #submit:hover{
-        width: 82%;
-        color: $baseColor;
-        transition: 0.3s;
-    }
-
-    input[type="date"]{
-        padding: 0 5px;
-        background: $baseColor2;
-    }
+    
 }
 
+.charge{
+    margin: auto;
+}
 
-.selectFactor, .selectEquid{
+.loading{
+    height: 400px;
+}
+
+.datePicker{
+    filter: drop-shadow(0px 2px 5px rgb(0, 0, 0));
+}
+
+.selectFactor, .selectEquid, .selectGraphic{
     outline: none;
     margin-bottom: 15px;
     background: $baseColor;
     border-radius: 7px;
     color: black;
     font-size: 1.1rem;
+    padding: 0 10px;
+    filter: drop-shadow(0px 2px 5px rgb(0, 0, 0));
     .option{
         text-align: center;
         align-items: center;
@@ -104,13 +113,47 @@ header {
     .option:hover{
         background: $baseColor2;
         color: white;
-        
+    }
+}
+
+.graphicOption{
+    width: 100%;
+    align-items: center;
+    text-align: center;
+    padding-left: 90px;
+    #selectMeasurement{
+        width: 50%;
+        float: left;
+    }
+    #selectGraphic{
+        width: 50%;
+        float: right;
     }
 }
 
 .selectFactor{
     @include size(35px, 85%);
+    margin-bottom: 20px;
 }
 .selectEquid{
-    @include size(35px, auto);
+    @include size(35px, 95%);
+}
+.selectGraphic{
+    @include size(35px, 50%)
+}
+
+#infoSelect{
+    align-items: center;
+    text-align: center;
+}
+
+#dates{
+    padding-top: 50px;
+    text-shadow: black 0em 0.2em 0.9em;
+    #initDate{
+        float: left;
+    }
+    #endDate{
+        float: right;
+    }
 }

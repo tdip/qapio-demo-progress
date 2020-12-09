@@ -1,6 +1,8 @@
 import * as React from "react";
 
-import {VictoryLine, VictoryBar, VictoryChart, VictoryZoomContainer, VictoryAxis,} from "victory";
+import logo from './logo.svg';
+
+import {VictoryLine, VictoryBar, VictoryChart, VictoryZoomContainer, VictoryLabel, VictoryAxis} from "victory";
 import ReactLoading from "react-loading";
 import { DateRange, DateRangePicker } from "@blueprintjs/datetime";
 import { Classes} from "@blueprintjs/core";
@@ -28,22 +30,15 @@ function App() {
   const [styles, setStyles] = React.useState(getStyles());
   const [msg, setMsg] = React.useState(
     <div className="loading">
-      <ReactLoading className="bubble" type="spinningBubbles" color="#ffffff" />
+      <ReactLoading className="charge" type="spinningBubbles" color="#ffffff"/>
     </div>
   );
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = React.useState({graphic:false, factor:false, measurement:false});
   const [equidList, setEquid] = React.useState([]);
   const [factorList, setFactor] = React.useState([]);
   const [info, setInfo] = React.useState({factor: "", measur: ""})
 
   
-
-  const queryResults = `from(bucket: "${bucket}")
-      |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
-      |> filter(fn: (r) => r._measurement == "go_gc_duration_seconds")
-      |> filter(fn: (r) => r._field == "count")
-      |> aggregateWindow(fn: mean, every: 24h)
-      `;
 
   const handleInputChange = (event: ReactFormInput) => {
     const element = event.target as HTMLInputElement;
@@ -53,9 +48,28 @@ function App() {
     });
   };
 
+  //FACTOR'S LIST
+  const handleDateChange = (dateRange: DateRange) => {
+    setDateRange( dateRange );
+    if(dateRange[0] !== null && dateRange[1] !== null){
+      setFactor([]);
+      setEquid([]);
+      var queryFactorList = `from(bucket: "qapio") 
+        |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
+        |> columns()
+        |> keep(columns: ["_field"])
+        |> group(columns: ["_field"])
+        |> distinct()`;
+      setLoading({graphic:false, factor:true, measurement:false})
+      dataInflux(queryFactorList, 2);
+    }
+  };
+
+  //MEASUREMENTE LIST
   const handleSelect = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
     if(element.value !== ""){
+      setLoading({graphic: false, factor: false, measurement: true})
     const queryEquid = `from(bucket: "${bucket}")
       |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
         |> filter(fn: (r) => r._field == "${element.value}")
@@ -70,20 +84,32 @@ function App() {
     }
   }
 
+  //GRAPHIC
   const handleMeasurement = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
     if(element.value !== ""){
       setArreglo([])
     const queryEquid = `from(bucket: "${bucket}")
       |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
-        |> filter(fn: (r) => r._measurement == "${element.value}")
-        |> filter(fn: (r) => r._field == "${info.factor}")
-        |> aggregateWindow(fn: mean, every: 24h)
+      |> filter(fn: (r) => r._measurement == "${element.value}")
+      |> filter(fn: (r) => r._field == "${info.factor}")
+      |> aggregateWindow(fn: mean, every: 1d)
       `;
-      setLoading(true)
+    setLoading({graphic:true, factor:false, measurement:false})
     dataInflux(queryEquid, 1);
     
     setInfo({factor: info.factor, measur: element.value})
+    }
+  }
+
+  const handleChangeGraphic = (event: ReactFormSelect) => {
+    const element = event.target as HTMLSelectElement;
+    if(element.value !== ""){
+      if(element.value === "bars"){
+        setGraphic(defaultGraphic);
+      }else{
+        setGraphic(lineGraphic);
+      }
     }
   }
 
@@ -122,32 +148,10 @@ function App() {
         console.log("\\nFinished ERROR");
       },
       complete() {
-        setLoading(false);
+        setLoading({graphic:false, factor:false, measurement:false})
         console.log("\\nFinished SUCCESS");
       },
     });
-  };
-
-  const sendData = () => {
-    if (dateRange[0] !== null || dateRange !== null) {
-      setLoading(true);
-      setArreglo([]);
-      dataInflux(queryResults, 1);
-    }
-  };
-
-  const handleDateChange = (dateRange: DateRange) => {
-    setDateRange( dateRange );
-    if(dateRange[0] !== null && dateRange[1] !== null){
-      setFactor([])
-      var queryFactorList = `from(bucket: "qapio") 
-        |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
-        |> columns()
-        |> keep(columns: ["_field"])
-        |> group(columns: ["_field"])
-        |> distinct()`
-      dataInflux(queryFactorList, 2);
-  }
   };
 
   function dateToString(date: Date, option = false){
@@ -167,88 +171,127 @@ function App() {
     }
   }
 
-  const formatBar = arreglo.map(x => dateToString(x.x));
+  const defaultGraphic = (
+    <VictoryChart
+      height={300} width={700}
+      domainPadding={45}
+      padding={{ top: 10, bottom: 55, left: 35, right: 15 }}
+    >
+
+      <VictoryAxis
+        style={styles.dependet}
+        tickValues={arreglo.map(x => x.x)}
+        tickFormat={arreglo.map(x => x.x.toLocaleDateString())}
+      />
+      <VictoryAxis
+        dependentAxis
+        style={styles.independet}
+        tickFormat={(x) => (x)}
+      />
+      <VictoryBar
+        data={arreglo}
+        labels={arreglo.map(x => parseInt((x.y).toString()))}
+        style={{ data: { fill: "#4472c3ff"}}}
+        animate={{
+          duration: 2000,
+          onLoad: { duration: 1000 }
+        }}
+      />
+    </VictoryChart>
+  )
+
+  const lineGraphic = (
+    <VictoryChart
+      scale={{ x: "time" }}
+      height={300} width={700}
+      padding={{ top: 10, bottom: 55, left: 35, right: 15 }}
+      containerComponent={<VictoryZoomContainer />}
+    >
+      {arreglo.length <= 1 ? (
+        <></>
+      ) : (
+        <VictoryAxis style={styles.dependet} />
+      )}
+      <VictoryAxis dependentAxis style={styles.independet} />
+
+      <VictoryLine
+        style={{ data: { stroke: "tomato" } }}
+        data={arreglo}
+        animate={{
+          duration: 2000,
+          onLoad: { duration: 1000 },
+        }}
+      />
+    </VictoryChart>
+  )
+
+  const [graphic, setGraphic] = React.useState(defaultGraphic)
 
   return (
     <React.Fragment>
-     {console.log(factorList)}
+
       <header id="header">
+        <div className="logo">
+          <img src={logo} alt=""/>
+        </div>
       </header>
 
       <div className="container-fluid gridContainer">
         <div className="row">
 
-          <aside className="col-md-3 comands">
-            <br/>
-            <select className="selectFactor" onChange={handleSelect}>
-              <option key={0} value="">Select Factor</option>
-              {factorList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
-            </select>
-            
-            <br/>
-            <div className={Classes.DARK}>
-              <DateRangePicker
-              shortcuts={false}
-              singleMonthOnly={true}
-              onChange={handleDateChange}
-              />
+          <aside className="col-sm-3 comands">
+            <div className="factor">
+              <select className="selectFactor" onChange={handleSelect}>
+                <option key={0} value="">Select Factor</option>
+                {factorList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
+              </select>
+              {loading.factor ? (<ReactLoading className="charge" height={20} width={40} type="bubbles" color="#ffffff" />) : (<></>)}
             </div>
-           
-            <br />
-            <button id="submit" onClick={sendData} type="submit">
-              Search
-            </button>
+            <br/>
+            <div className="datePicker">
+              <div className={Classes.DARK}>
+                <DateRangePicker
+                shortcuts={false}
+                singleMonthOnly={true}
+                onChange={handleDateChange}
+                />
+              </div>
+            </div>
           </aside>
 
-          <div className="col-md-9">
-            <div>
-              <h1>{info.factor}</h1><br/>
-              <h2>{info.measur}</h2><br/>
-            </div>
-            <div className="grafico">
-            {loading ? (
-              msg
-            ) : (
-              <VictoryChart
-              height={300} width={700}
-              domainPadding={20}
-              padding={{ top: 20, bottom: 50, left: 35, right: 15 }}
-        >
+          <section className="col-sm-9">
+            <article className="information">
+              <div id="dates">
+                {dateRange[0] !== null && dateRange[1] !== null ? (<h5 id="initDate">{new Date(dateRange[0]).toDateString()}</h5>) : (<></>)}
+                {dateRange[0] !== null && dateRange[1] !== null ? (<h5 id="endDate">{new Date(dateRange[1]).toDateString()}</h5>) : (<></>)}
+              </div>
+            </article>
 
-          <VictoryAxis
-            style={styles.dependet}
-            standalone={false}
-            tickValues={arreglo.map(x => x.x)}
-            tickFormat={formatBar}
-          />
-          <VictoryAxis
-            dependentAxis
-            standalone={false}
-            style={styles.independet}
-            tickFormat={(x) => (x)}
-          />
-          <VictoryBar
-            barWidth={20}
-            standalone={false}
-            data={arreglo}
-            x="x"
-            y="y"
-            labels={arreglo.map(x => parseInt(x.y))}
-            style={{ data: { fill: "#4472c3ff"}}}
-          />
-        </VictoryChart>
+            <div className="grafico">
+            {loading.graphic ? (msg) : (
+              graphic
             )}
             <br></br>
+
             </div>
-            <select className="selectEquid" onChange={handleMeasurement}>
-              <option key={0} value="">Equidad</option>
-              {equidList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
-            </select>
-           
-            <select >
-              <option>Graphic</option>
-            </select>
-          </div>
+
+            <article className="graphicOption">
+              <div id="selectMeasurement">
+              <select className="selectEquid" onChange={handleMeasurement}>
+                <option key={0} value="">Equidad</option>
+                {equidList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
+              </select>
+              {loading.measurement ? (<ReactLoading className="charge" height={20} width={40} type="bubbles" color="#ffffff" />) : (<></>)}
+              </div>
+              <div id="selectGraphic">
+                <select className="selectGraphic" onChange={handleChangeGraphic}>
+                  <option value="bars">Bars</option>
+                  <option value="line">Line</option>
+                </select>
+              </div>
+            </article>
+          </section>
+
         </div>
       </div>
     </React.Fragment>
