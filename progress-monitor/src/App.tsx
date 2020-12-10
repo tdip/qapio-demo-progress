@@ -65,6 +65,7 @@ function App() {
   //CREATE MEASUREMENTE LIST -- Selecting a Factor
   const handleSelect = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
+    setEquid([]);
     if(element.value !== ""){
       setLoading({graphic: false, factor: false, measurement: true})
     const queryEquid = `from(bucket: "${bucket}")
