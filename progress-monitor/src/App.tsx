@@ -200,9 +200,9 @@ function App() {
   //VictoryBars
   const defaultGraphic = (
     <VictoryChart
-      height={300} width={700}
+      height={styles.chart.height} width={styles.chart.width}
+      padding={styles.chart.padding}
       domainPadding={45}
-      padding={{ top: 10, bottom: 65, left: 35, right: 15 }}
     >
 
       <VictoryAxis
@@ -232,20 +232,16 @@ function App() {
   const lineGraphic = (
     <VictoryChart
       scale={{ x: "time" }}
-      height={300} width={700}
-      padding={{ top: 10, bottom: 65, left: 35, right: 15 }}
+      height={styles.chart.height} width={styles.chart.width}
+      padding={styles.chart.padding}
       containerComponent={<VictoryVoronoiContainer/>}
     >
-      {arreglo.length <= 1 ? (
-        <></>
-      ) : (
-        <VictoryAxis style={styles.independent} />
-      )}
+      <VictoryAxis style={styles.independent} />
+
       <VictoryAxis dependentAxis 
       style={arreglo.length >= 1 ? styles.dependent : styles.dependentNull}/>
 
       <VictoryLine
-      
         labelComponent={tooltip}
         style={styles.line}
         data={arreglo}

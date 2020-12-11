@@ -2,10 +2,16 @@ import { Background } from "victory"
 
 export function getStyles() {
 
-  const BLUE_BAR = "#cfdae0ff";
-  const BLUE_BARS = "#4472c3ff";
-  const TOOLTIP  = "#1e1e1eff";
+  const BASE_COLOR = "#4472c3ff";
+  const BASE_COLOR_LIGTH = "#cfdae0ff";
+
     return {
+      //victoryChart
+      chart: {
+        padding: { top: 10, bottom: 65, left: 35, right: 15 },
+        height:300,
+        width:700
+      },
       // X
       independent: {
         grid: { strokeWidth: 0},
@@ -13,7 +19,7 @@ export function getStyles() {
         axis: { stroke: "white", strokeWidth: 1},
         
         tickLabels: {
-          padding: 25,
+          padding: 32,
           fill: "white",
           fontFamily: "inherit",
           fontSize: 12,
@@ -51,13 +57,13 @@ export function getStyles() {
       },
 
       line: { 
-        data: { stroke: "#4472c3ff" },
-        labels: {fill:"#cfdae0ff"}
+        data: { stroke: BASE_COLOR },
+        labels: {fill: BASE_COLOR_LIGTH}
       },
 
       bars: {
-        data: { fill: "#4472c3ff"},
-        labels: {fill:"#cfdae0ff"}
+        data: { fill: BASE_COLOR},
+        labels: {fill: BASE_COLOR_LIGTH}
       }
     };
   }
