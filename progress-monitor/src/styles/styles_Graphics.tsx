@@ -57,7 +57,7 @@ export function getStyles() {
       },
 
       line: { 
-        data: { stroke: BASE_COLOR },
+        data: { stroke: BASE_COLOR, strokeWidth: 4, strokeLinecap: "round" },
         labels: {fill: BASE_COLOR_LIGTH}
       },
 
