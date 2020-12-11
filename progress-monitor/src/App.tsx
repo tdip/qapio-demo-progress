@@ -26,6 +26,7 @@ function App() {
   const [dateRange, setDateRange] = React.useState([null, null]);
   const [arreglo, setArreglo] = React.useState<tabla[]>([]);
   const [styles, setStyles] = React.useState(getStyles());
+  
   const [loading, setLoading] = React.useState({graphic:false, factor:false, measurement:false, id:false});
   const [id, setId] = React.useState([]);
   const [equidList, setEquid] = React.useState([]);
@@ -41,6 +42,27 @@ function App() {
   flyoutStyle={{
     stroke: "none", fill:"#1e1e1eff"}}
   />)
+
+  function getWindowDimensions() {
+    const { innerWidth: width, innerHeight: height } = window;
+    return {
+      width,
+      height
+    };
+  }
+  
+
+    const [windowDimensions, setWindowDimensions] = React.useState(getWindowDimensions());
+  
+    React.useEffect(() => {
+      function handleResize() {
+        setWindowDimensions(getWindowDimensions());
+      }
+  
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
+  
 
   //CREATE FACTOR'S LIST -- Selection range date
   const handleDateChange = (dateRange: DateRange) => {
@@ -77,7 +99,6 @@ function App() {
         |> group(columns: ["_field"])
         |> distinct()`;
     setLoading({graphic:false, factor:true, measurement:false, id:false})
-    console.log(queryFactorList)
     dataInflux(queryFactorList, 3);
   }
 
@@ -200,11 +221,10 @@ function App() {
   //VictoryBars
   const defaultGraphic = (
     <VictoryChart
-      height={styles.chart.height} width={styles.chart.width}
+      height={windowDimensions.width <= 650 ? 290 : styles.chart.height} width={windowDimensions.width <= 650 ? 400 : styles.chart.width}
       padding={styles.chart.padding}
       domainPadding={45}
     >
-
       <VictoryAxis
         style={styles.independent}
         tickValues={arreglo.map(x => x.x)}
@@ -232,7 +252,7 @@ function App() {
   const lineGraphic = (
     <VictoryChart
       scale={{ x: "time" }}
-      height={styles.chart.height} width={styles.chart.width}
+      height={windowDimensions.width <= 650 ? 290 : styles.chart.height} width={windowDimensions.width <= 650 ? 400 : styles.chart.width}
       padding={styles.chart.padding}
       containerComponent={<VictoryVoronoiContainer/>}
     >
@@ -281,7 +301,7 @@ function App() {
       <div className="container-fluid gridContainer">
         <div className="row">
 
-          <aside className="col-sm-3 comands">
+          <aside className="col-md-3 col-sm-12 comands">
             <div className="IDBox">
               <header>ID</header>
               <div>
@@ -301,7 +321,7 @@ function App() {
             </div>
           </aside>
 
-          <section className="col-sm-9">
+          <section className="col-md-9 col-sm-12 ">
             <article className="information">
               <div id="dates">
                 {dateRange[0] !== null && dateRange[1] !== null ? (<h5 id="initDate">{new Date(dateRange[0]).toDateString()}</h5>) : (<></>)}

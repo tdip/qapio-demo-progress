@@ -169,5 +169,27 @@ header {
 ::-webkit-scrollbar-thumb:hover {
   background: #006e86; }
 
+@media (max-width: 1024px) {
+  .IDBox {
+    width: 100%; } }
+
+@media (max-width: 720px) {
+  .IDBox {
+    width: 80%; }
+  .graphicOption {
+    height: 100px;
+    padding-left: 12px; } }
+
+@media (max-width: 575px) {
+  .IDBox {
+    width: 85%; }
+  .loading {
+    height: 300px; }
+  .grafico {
+    height: 300px; }
+  .graphicOption {
+    height: 100px;
+    padding-left: 15px; } }
+
 
 /*# sourceMappingURL=/src.f69400ca.css.map */

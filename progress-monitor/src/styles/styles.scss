@@ -198,18 +198,50 @@ header {
 ::-webkit-scrollbar {
     width: 12px;
     height: 12px;
-    }
+}
     
-    ::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
     border: 0;
     border-radius: 20px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
+}
+
+::-webkit-scrollbar-thumb {
     background: rgb(23, 169, 202);  
     border-radius: 20px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
+}
+
+::-webkit-scrollbar-thumb:hover {
     background: rgb(0, 110, 134);  
+}
+
+@media (max-width: 1024px){ 
+    .IDBox{
+        width: 100%;
+    }   
+}
+
+@media (max-width: 720px){ 
+    .IDBox{
+        width: 80%;
     }
+    .graphicOption{
+        height: 100px;
+        padding-left: 12px;
+    }
+}
+
+@media (max-width: 575px) { 
+    .IDBox{
+        width: 85%;
+    }
+    .loading{
+        height: 300px;
+    }
+    .grafico{
+        height: 300px;
+    }
+    .graphicOption{
+        height: 100px;
+        padding-left: 15px;
+    }
+}
