@@ -1,8 +1,7 @@
 import * as React from "react";
-
 import logo from './logo.svg';
 
-import {VictoryLine, VictoryBar, VictoryChart, VictoryZoomContainer, VictoryVoronoiContainer, VictoryAxis, VictoryTooltip} from "victory";
+import {VictoryLine, VictoryBar, VictoryChart, VictoryVoronoiContainer, VictoryAxis, VictoryTooltip} from "victory";
 import ReactLoading from "react-loading";
 import { DateRange, DateRangePicker } from "@blueprintjs/datetime";
 import { Classes} from "@blueprintjs/core";
@@ -19,7 +18,7 @@ const bucket = "qapio";
 const client = new InfluxDB({ url: "http://localhost:8086", token: token });
 
 interface tabla {x: Date; y: number;}
-type ReactFormInput = React.FormEvent<HTMLInputElement>;
+
 type ReactFormSelect = React.FormEvent<HTMLSelectElement>;
 
 function App() {
@@ -27,10 +26,11 @@ function App() {
   const [dateRange, setDateRange] = React.useState([null, null]);
   const [arreglo, setArreglo] = React.useState<tabla[]>([]);
   const [styles, setStyles] = React.useState(getStyles());
-  const [loading, setLoading] = React.useState({graphic:false, factor:false, measurement:false});
+  const [loading, setLoading] = React.useState({graphic:false, factor:false, measurement:false, id:false});
+  const [id, setId] = React.useState([]);
   const [equidList, setEquid] = React.useState([]);
   const [factorList, setFactor] = React.useState([]);
-  const [info, setInfo] = React.useState({factor: "", measur: "", graphic: "bars"})
+  const [info, setInfo] = React.useState({id: "", factor: "", measur: "", graphic: "bars"})
   const [msg, setMsg] = React.useState(
     <div className="loading">
       <ReactLoading className="charge" type="spinningBubbles" color="#ffffff"/>
@@ -45,40 +45,60 @@ function App() {
   //CREATE FACTOR'S LIST -- Selection range date
   const handleDateChange = (dateRange: DateRange) => {
     setDateRange( dateRange );
-    setInfo({factor: "", measur:"", graphic: info.graphic})
+    setInfo({id: "", factor: "", measur:"", graphic: info.graphic})
     setArreglo([]);
+    setId([])
+    setFactor([]);
+    setEquid([]);
     if(dateRange[0] !== null && dateRange[1] !== null){
-      setFactor([]);
-      setEquid([]);
-      
-      var queryFactorList = `from(bucket: "qapio") 
+      var queryId = `from(bucket: "qapio") 
         |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
+        |> columns()
+        |> keep(columns: ["_screeningModelId"])
+        |> group(columns: ["_screeningModelId"])
+        |> distinct()`;
+      
+      setLoading({graphic:false, factor:false, measurement:false, id:true})
+      dataInflux(queryId, 2);
+    }
+  };
+
+  const handleID = (event:any) =>{
+    const element = event.target as HTMLLIElement;
+    setInfo({id: element.innerText, factor: "", measur:"", graphic: info.graphic})
+    setArreglo([]);
+    setFactor([]);
+    setEquid([]);
+    var queryFactorList = `from(bucket: "qapio") 
+        |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
+        |> filter(fn: (r) => r._screeningModelId == "${element.innerText}")
         |> columns()
         |> keep(columns: ["_field"])
         |> group(columns: ["_field"])
         |> distinct()`;
-      setLoading({graphic:false, factor:true, measurement:false})
-      dataInflux(queryFactorList, 2);
-    }
-  };
+    setLoading({graphic:false, factor:true, measurement:false, id:false})
+    console.log(queryFactorList)
+    dataInflux(queryFactorList, 3);
+  }
 
   //CREATE MEASUREMENTE LIST -- Selecting a Factor
   const handleSelect = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
     setEquid([]);
     if(element.value !== ""){
-      setLoading({graphic: false, factor: false, measurement: true})
+      setLoading({graphic: false, factor: false, measurement: true, id: false})
     const queryEquid = `from(bucket: "${bucket}")
       |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
         |> filter(fn: (r) => r._field == "${element.value}")
+        |> filter(fn: (r) => r._screeningModelId == "${info.id}")
         |> columns()
         |> keep(columns: ["_measurement"])
         |> group(columns: ["_measurement"])
         |> distinct()
       `;
-    dataInflux(queryEquid, 3);
+    dataInflux(queryEquid, 4);
     setArreglo([])
-    setInfo({factor: element.value, measur: "", graphic: info.graphic})
+    setInfo({id: info.id, factor: element.value, measur: "", graphic: info.graphic})
     }
   }
 
@@ -91,19 +111,20 @@ function App() {
       |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
       |> filter(fn: (r) => r._measurement == "${element.value}")
       |> filter(fn: (r) => r._field == "${info.factor}")
+      |> filter(fn: (r) => r._screeningModelId == "${info.id}")
       |> aggregateWindow(fn: mean, every: 1d)
       `;
-    setLoading({graphic:true, factor:false, measurement:false})
+    setLoading({graphic:true, factor:false, measurement:false, id: false})
     dataInflux(queryEquid, 1);
     
-    setInfo({factor: info.factor, measur: element.value, graphic:info.graphic})
+    setInfo({id: info.id, factor: info.factor, measur: element.value, graphic:info.graphic})
     }
   }
 
   //Change graphic's type
   const handleChangeGraphic = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
-    setInfo({factor: info.factor, measur: info.measur, graphic: element.value})
+    setInfo({id: info.id, factor: info.factor, measur: info.measur, graphic: element.value})
     if(element.value !== ""){
       if(element.value === "bars"){
         setGraphic(defaultGraphic);
@@ -132,10 +153,14 @@ function App() {
             break;
 
             case 2:
-              setFactor((factorList) => [...factorList, o._field])
+              setId((id) => [...id, o._screeningModelId]);
             break;
 
             case 3:
+              setFactor((factorList) => [...factorList, o._field]);
+            break;
+
+            case 4:
               setEquid((equidList) => [...equidList, o._measurement])
             break;
 
@@ -148,7 +173,7 @@ function App() {
         console.log("\\nFinished ERROR");
       },
       complete() {
-        setLoading({graphic:false, factor:false, measurement:false})
+        setLoading({graphic:false, factor:false, measurement:false, id:false})
         console.log("\\nFinished SUCCESS");
       },
     });
@@ -177,7 +202,7 @@ function App() {
     <VictoryChart
       height={300} width={700}
       domainPadding={45}
-      padding={{ top: 10, bottom: 55, left: 35, right: 15 }}
+      padding={{ top: 10, bottom: 65, left: 35, right: 15 }}
     >
 
       <VictoryAxis
@@ -190,6 +215,7 @@ function App() {
         style={arreglo.length >= 1 ? styles.dependent : styles.dependentNull}
       />
       <VictoryBar
+        
         labelComponent={tooltip}
         data={arreglo}
         labels={arreglo.map(x => (x.y).toFixed(2))}
@@ -207,7 +233,7 @@ function App() {
     <VictoryChart
       scale={{ x: "time" }}
       height={300} width={700}
-      padding={{ top: 10, bottom: 55, left: 35, right: 15 }}
+      padding={{ top: 10, bottom: 65, left: 35, right: 15 }}
       containerComponent={<VictoryVoronoiContainer/>}
     >
       {arreglo.length <= 1 ? (
@@ -243,7 +269,7 @@ function App() {
       setGraphic(lineGraphic);
     }else{
       setGraphic(defaultGraphic);
-      setInfo({factor: info.factor, measur: info.measur, graphic: "bars"})
+      setInfo({id: info.id, factor: info.factor, measur: info.measur, graphic: "bars"})
     }
   }, [arreglo])
 
@@ -260,12 +286,12 @@ function App() {
         <div className="row">
 
           <aside className="col-sm-3 comands">
-            <div className="factor">
-              <select className="selectFactor" onChange={handleSelect} disabled={loading.factor} value={info.factor}>
-                <option key={0} value="">Factor</option>
-                {factorList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
-              </select>
-              {loading.factor ? (<ReactLoading className="charge" height={20} width={40} type="bubbles" color="#ffffff" />) : (<></>)}
+            <div className="IDBox">
+              <header>ID</header>
+              <div>
+              {loading.id ? (<label><br/><ReactLoading className="charge" height={70} width={80} type="bubbles" color="#000000" /></label>) : 
+              (id.map((x, index) => (<a key={index} onClick={handleID} href={"#" + x} id={x} className="target">{x}</a>)))}
+              </div>
             </div>
             <br/>
             <div className="datePicker">
@@ -296,6 +322,13 @@ function App() {
             </div>
 
             <article className="graphicOption">
+            <div id="selectFactor">
+              <select className="selectFactor" onChange={handleSelect} disabled={loading.factor} value={info.factor}>
+                <option key={0} value="">Factor</option>
+                {factorList.map((x, index) => <option key={index + 1} value={x}>{x}</option>)}
+              </select>
+              {loading.factor ? (<ReactLoading className="charge" height={20} width={40} type="bubbles" color="#ffffff" />) : (<></>)}
+            </div>
               <div id="selectMeasurement">
               <select className="selectEquid" onChange={handleMeasurement} disabled={loading.measurement} value={info.measur}>
                 <option key={0} value="">Measurement</option>
@@ -306,7 +339,7 @@ function App() {
               <div id="selectGraphic">
                 <select className="selectGraphic" onChange={handleChangeGraphic} value={info.graphic}>
                   <option value="bars">Bar Graphic</option>
-                  <option value="line" disabled={arreglo.length <= 0 ? true : false}>Line Graphic</option>
+                  <option value="line" disabled={arreglo.length <= 1 ? true : false}>Line Graphic</option>
                 </select>
               </div>
             </article>

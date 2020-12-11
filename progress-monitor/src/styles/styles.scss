@@ -55,15 +55,57 @@ header {
 }
 
 .gridContainer{
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 .information{
-    height: 100px;
+    height: 85px;
     h4{
         text-align: right;
         bottom: 0;
     }
+}
+
+.IDBox {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    background: $baseColor;
+    border: none;
+    padding: 5px;
+    font: 24px/36px sans-serif;
+    width: 85%;
+    height: 260px;
+    overflow: auto;
+    filter: drop-shadow(0px 10px 10px rgb(0, 0, 0));
+    header{
+        padding: 5px 0;
+        height: 30px;
+        line-height: normal;
+        margin-bottom: 3px;
+    }
+    div{
+        a{
+            text-decoration: none;
+            color: $backColor;
+            padding: 2px 0;
+            display: inline-block;
+            height: auto;
+            width: 100%;
+            font-size: 1.1rem;
+            border-bottom: 1px solid $backColor;
+        }
+        a:hover, :target{
+            background: $baseColor2;
+            color: white;
+            width: 100%;
+        }
+        
+    }
+    
+}
+
+.datePicker{
+    filter: drop-shadow(0px 2px 5px rgb(0, 0, 0));
 }
 
 .comands, .grafico, .loading{
@@ -76,11 +118,6 @@ header {
 
 .comands{
     align-items: center;
-    .factor{
-        width: 90%;
-        display: inline;
-    }
-    
 }
 
 .charge{
@@ -91,13 +128,9 @@ header {
     height: 400px;
 }
 
-.datePicker{
-    filter: drop-shadow(0px 2px 5px rgb(0, 0, 0));
-}
-
 .selectFactor, .selectEquid, .selectGraphic{
     outline: none;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     background: $baseColor;
     border-radius: 7px;
     color: black;
@@ -121,25 +154,28 @@ header {
     align-items: center;
     text-align: center;
     padding-left: 90px;
+    #selectFactor{
+        width: 35%;
+        float: left;
+    }
     #selectMeasurement{
-        width: 50%;
+        width: 35%;
         float: left;
     }
     #selectGraphic{
-        width: 50%;
+        width: 30%;
         float: right;
     }
 }
 
 .selectFactor{
-    @include size(35px, 85%);
-    margin-bottom: 20px;
+    @include size(35px, 95%);
 }
 .selectEquid{
     @include size(35px, 95%);
 }
 .selectGraphic{
-    @include size(35px, 60%)
+    @include size(35px, 70%)
 }
 
 #infoSelect{
@@ -157,3 +193,23 @@ header {
         float: right;
     }
 }
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+    }
+    
+    ::-webkit-scrollbar-track {
+    border: 0;
+    border-radius: 20px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+    background: rgb(23, 169, 202);  
+    border-radius: 20px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+    background: rgb(0, 110, 134);  
+    }

@@ -36,13 +36,46 @@ header {
       height: 55px; }
 
 .gridContainer {
-  margin-top: 10px; }
+  margin-top: 5px; }
 
 .information {
-  height: 100px; }
+  height: 85px; }
   .information h4 {
     text-align: right;
     bottom: 0; }
+
+.IDBox {
+  margin-top: 25px;
+  margin-bottom: 10px;
+  background: #cfdae0ff;
+  border: none;
+  padding: 5px;
+  font: 24px/36px sans-serif;
+  width: 85%;
+  height: 260px;
+  overflow: auto;
+  filter: drop-shadow(0px 10px 10px black); }
+  .IDBox header {
+    padding: 5px 0;
+    height: 30px;
+    line-height: normal;
+    margin-bottom: 3px; }
+  .IDBox div a {
+    text-decoration: none;
+    color: #303634;
+    padding: 2px 0;
+    display: inline-block;
+    height: auto;
+    width: 100%;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #303634; }
+  .IDBox div a:hover, .IDBox div :target {
+    background: #60c3daff;
+    color: white;
+    width: 100%; }
+
+.datePicker {
+  filter: drop-shadow(0px 2px 5px black); }
 
 .comands, .grafico, .loading {
   display: flex;
@@ -56,9 +89,6 @@ header {
 
 .comands {
   align-items: center; }
-  .comands .factor {
-    width: 90%;
-    display: inline; }
 
 .charge {
   margin: auto; }
@@ -66,12 +96,9 @@ header {
 .loading {
   height: 400px; }
 
-.datePicker {
-  filter: drop-shadow(0px 2px 5px black); }
-
 .selectFactor, .selectEquid, .selectGraphic {
   outline: none;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
   background: #cfdae0ff;
   border-radius: 7px;
   color: black;
@@ -92,17 +119,19 @@ header {
   align-items: center;
   text-align: center;
   padding-left: 90px; }
+  .graphicOption #selectFactor {
+    width: 35%;
+    float: left; }
   .graphicOption #selectMeasurement {
-    width: 50%;
+    width: 35%;
     float: left; }
   .graphicOption #selectGraphic {
-    width: 50%;
+    width: 30%;
     float: right; }
 
 .selectFactor {
   height: 35px;
-  width: 85%;
-  margin-bottom: 20px; }
+  width: 95%; }
 
 .selectEquid {
   height: 35px;
@@ -110,7 +139,7 @@ header {
 
 .selectGraphic {
   height: 35px;
-  width: 50%; }
+  width: 70%; }
 
 #infoSelect {
   align-items: center;
@@ -123,6 +152,22 @@ header {
     float: left; }
   #dates #endDate {
     float: right; }
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px; }
+
+::-webkit-scrollbar-track {
+  border: 0;
+  border-radius: 20px; }
+
+::-webkit-scrollbar-thumb {
+  background: #17a9ca;
+  border-radius: 20px; }
+
+::-webkit-scrollbar-thumb:hover {
+  background: #006e86; }
 
 
 /*# sourceMappingURL=/src.f69400ca.css.map */
