@@ -1,15 +1,16 @@
 import * as React from "react";
-import logo from './logo.svg';
+import logo from './logo.svg'; //logo in header
 
 import {VictoryLine, VictoryBar, VictoryChart, VictoryVoronoiContainer, VictoryAxis, VictoryTooltip} from "victory";
 import ReactLoading from "react-loading";
 import { DateRange, DateRangePicker } from "@blueprintjs/datetime";
 import { Classes} from "@blueprintjs/core";
-
+//styles
 import { getStyles } from "./styles/styles_Graphics";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/styles.scss";
 
+//INFLUX API
 const { InfluxDB } = require("@influxdata/influxdb-client");
 
 const token = "TV5r7CtALtoRh8JnTAfH-fsF-ByvIpz2cWibe0ElhK_ou-WO6PTD_xn95RkSzh4T3DVxyE14TCUukCzl8d60cQ==";
@@ -17,33 +18,33 @@ const org = "qapio";
 const bucket = "qapio";
 const client = new InfluxDB({ url: "http://localhost:8086", token: token });
 
+//types
 interface tabla {x: Date; y: number;}
-
 type ReactFormSelect = React.FormEvent<HTMLSelectElement>;
 
 function App() {
 
-  const [dateRange, setDateRange] = React.useState([null, null]);
-  const [arreglo, setArreglo] = React.useState<tabla[]>([]);
-  const [styles, setStyles] = React.useState(getStyles());
-  
-  const [loading, setLoading] = React.useState({graphic:false, factor:false, measurement:false, id:false});
-  const [id, setId] = React.useState([]);
-  const [equidList, setEquid] = React.useState([]);
-  const [factorList, setFactor] = React.useState([]);
-  const [info, setInfo] = React.useState({id: "", factor: "", measur: "", graphic: "bars"})
-  const [msg, setMsg] = React.useState(
+  const [dateRange, setDateRange] = React.useState([null, null]); //saves the date range in the calendar
+  const [arreglo, setArreglo] = React.useState<tabla[]>([]);// saves all data from inlux to the graphic
+  const [styles, setStyles] = React.useState(getStyles());// get the styles from the graphics
+  const [loading, setLoading] = React.useState({graphic:false, factor:false, measurement:false, id:false});// is used to show the loading screen when it's true
+  const [id, setId] = React.useState([]);// save the ids in a date range
+  const [equidList, setEquid] = React.useState([]);// saves the measurements from a chonsen factor
+  const [factorList, setFactor] = React.useState([]);// saves the factor from a chonsen id
+  const [info, setInfo] = React.useState({id: "", factor: "", measur: "", graphic: "bars"});// save the name from id, factor, measurement and graphic to do a query
+  const [msg, setMsg] = React.useState( //is the loading screen 
     <div className="loading">
       <ReactLoading className="charge" type="spinningBubbles" color="#ffffff"/>
     </div>
   );
-  const tooltip = (
+  const tooltip = ( // is the style of label in the graphic when mouse is on a point
   <VictoryTooltip
   flyoutStyle={{
     stroke: "none", fill:"#1e1e1eff"}}
-  />)
+  />);
 
-  function getWindowDimensions() {
+//GET WINDOW DIMENSIONS--------------------------
+  function getWindowDimensions() { //get the window dimension, is used for resize the graphic when window is samall, only work when reload the screen in the dimension you want
     const { innerWidth: width, innerHeight: height } = window;
     return {
       width,
@@ -51,7 +52,6 @@ function App() {
     };
   }
   
-
     const [windowDimensions, setWindowDimensions] = React.useState(getWindowDimensions());
   
     React.useEffect(() => {
@@ -62,54 +62,60 @@ function App() {
       window.addEventListener('resize', handleResize);
       return () => window.removeEventListener('resize', handleResize);
     }, []);
-  
+//-----------------------------------------------  
 
-  //CREATE FACTOR'S LIST -- Selection range date
+  //HANDLE DATA CHANGE
+  //when one date  is change, reboot all to search data in new date range
   const handleDateChange = (dateRange: DateRange) => {
     setDateRange( dateRange );
-    setInfo({id: "", factor: "", measur:"", graphic: info.graphic})
+    setInfo({id: "", factor: "", measur:"", graphic: info.graphic});
     setArreglo([]);
     setId([])
     setFactor([]);
     setEquid([]);
-    if(dateRange[0] !== null && dateRange[1] !== null){
+    if(dateRange[0] !== null && dateRange[1] !== null){ //run when have a range, query only ask for the _screeningModelingId that exist in the date range
       var queryId = `from(bucket: "qapio") 
-        |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
+        |> range(start: ${dateToString(new Date(dateRange[0]))}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]))}T23:59:00Z)
         |> columns()
         |> keep(columns: ["_screeningModelId"])
         |> group(columns: ["_screeningModelId"])
         |> distinct()`;
       
-      setLoading({graphic:false, factor:false, measurement:false, id:true})
-      dataInflux(queryId, 2);
+      setLoading({graphic:false, factor:false, measurement:false, id:true});// the only loading screen is in the id
+      dataInflux(queryId, 2); //number 2 is to save data in variable hook "id" 
     }
   };
-
+  //HANDLE ID CHANGE
+  //this not reboot the data range, and the graph type remains
+  //the data will be in the drop down menu Factor
   const handleID = (event:any) =>{
     const element = event.target as HTMLLIElement;
-    setInfo({id: element.innerText, factor: "", measur:"", graphic: info.graphic})
+    setInfo({id: element.innerText, factor: "", measur:"", graphic: info.graphic});// save the id selected
     setArreglo([]);
     setFactor([]);
     setEquid([]);
+    //query ask for factors in the range and must have the id selected in _screeningModelId tag
     var queryFactorList = `from(bucket: "qapio") 
-        |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
+        |> range(start: ${dateToString(new Date(dateRange[0]))}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]))}T23:59:00Z)
         |> filter(fn: (r) => r._screeningModelId == "${element.innerText}")
         |> columns()
         |> keep(columns: ["_field"])
         |> group(columns: ["_field"])
         |> distinct()`;
-    setLoading({graphic:false, factor:true, measurement:false, id:false})
-    dataInflux(queryFactorList, 3);
+    setLoading({graphic:false, factor:true, measurement:false, id:false});// only factor will show a loading screen
+    dataInflux(queryFactorList, 3);//number 3 is to save data in variable hook "factor ist"
   }
 
-  //CREATE MEASUREMENTE LIST -- Selecting a Factor
+  //HANDLE IN SLECT FACTOR
+  //reboot graphic's data and the measurements
+  //the data will be in drop down menu Measurement
   const handleSelect = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
+    setArreglo([]);
     setEquid([]);
-    if(element.value !== ""){
-      setLoading({graphic: false, factor: false, measurement: true, id: false})
+    if(element.value !== ""){ //query ask for factors in the range and must have the id and selected in _screeningModelId tag and factor selected in _field
     const queryEquid = `from(bucket: "${bucket}")
-      |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
+      |> range(start: ${dateToString(new Date(dateRange[0]))}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]))}T23:59:00Z)
         |> filter(fn: (r) => r._field == "${element.value}")
         |> filter(fn: (r) => r._screeningModelId == "${info.id}")
         |> columns()
@@ -117,35 +123,39 @@ function App() {
         |> group(columns: ["_measurement"])
         |> distinct()
       `;
-    dataInflux(queryEquid, 4);
-    setArreglo([])
-    setInfo({id: info.id, factor: element.value, measur: "", graphic: info.graphic})
+    setLoading({graphic: false, factor: false, measurement: true, id: false});// the loading screen will be measurement
+    dataInflux(queryEquid, 4);// number 4 is to save data in "equidList" hook variable 
+    setInfo({id: info.id, factor: element.value, measur: "", graphic: info.graphic});//save the factor selected
     }
   }
 
-  //GET DATE FOR GRAPHIC -- selecting a measurement
+  //HANDLE MEASUREMENT CANGE
+  //only reboot the graphic's data
+  //this ask for the graphic's data
   const handleMeasurement = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
     if(element.value !== ""){
       setArreglo([])
+      //query ask data for graphic with filters saves in "info" hook variable
     const queryEquid = `from(bucket: "${bucket}")
-      |> range(start: ${dateToString(new Date(dateRange[0]), true)}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]), true)}T23:59:00Z)
+      |> range(start: ${dateToString(new Date(dateRange[0]))}T00:00:00Z, stop: ${dateToString(new Date(dateRange[1]))}T23:59:00Z)
       |> filter(fn: (r) => r._measurement == "${element.value}")
       |> filter(fn: (r) => r._field == "${info.factor}")
       |> filter(fn: (r) => r._screeningModelId == "${info.id}")
       |> aggregateWindow(fn: mean, every: 1d)
       `;
-    setLoading({graphic:true, factor:false, measurement:false, id: false})
-    dataInflux(queryEquid, 1);
+    setLoading({graphic:true, factor:false, measurement:false, id: false})//show loading screen in graphic's sapace
+    dataInflux(queryEquid, 1); //number 1 saves data in "arreglo" hook varialbe
     
-    setInfo({id: info.id, factor: info.factor, measur: element.value, graphic:info.graphic})
+    setInfo({id: info.id, factor: info.factor, measur: element.value, graphic:info.graphic})//all data saved
     }
   }
 
-  //Change graphic's type
+  //CHANGE GRAPHIC'S TYPE
+  //only show two type of graphics, bars and line
   const handleChangeGraphic = (event: ReactFormSelect) => {
     const element = event.target as HTMLSelectElement;
-    setInfo({id: info.id, factor: info.factor, measur: info.measur, graphic: element.value})
+    setInfo({id: info.id, factor: info.factor, measur: info.measur, graphic: element.value}) //change graphic's type
     if(element.value !== ""){
       if(element.value === "bars"){
         setGraphic(defaultGraphic);
@@ -155,6 +165,7 @@ function App() {
     }
   }
 
+  //INFLUX API
   const dataInflux = (query:string, option: number) => {
     const queryApi = client.getQueryApi(org);
 
@@ -162,7 +173,7 @@ function App() {
       next(row: any, tableMeta: any) {
         const o = tableMeta.toObject(row);
         switch(option){
-          case 1:
+          case 1: // save data in arreglo with type "tabla"
             var nume = parseFloat(`${o._value}`);
             var fecha = o._time;
             if (nume >= 0 || nume < 0) {
@@ -173,15 +184,15 @@ function App() {
             }
             break;
 
-            case 2:
+            case 2: //save the id's
               setId((id) => [...id, o._screeningModelId]);
             break;
 
-            case 3:
+            case 3://save factors in id selected
               setFactor((factorList) => [...factorList, o._field]);
             break;
 
-            case 4:
+            case 4://save measurement in factor selected
               setEquid((equidList) => [...equidList, o._measurement])
             break;
 
@@ -194,14 +205,17 @@ function App() {
         console.log("\\nFinished ERROR");
       },
       complete() {
-        setLoading({graphic:false, factor:false, measurement:false, id:false})
+        //!!!-------------------------------
+        //this line stops the loading screen, must be after finishing saving data in variables
+        setLoading({graphic:false, factor:false, measurement:false, id:false}) 
         console.log("\\nFinished SUCCESS");
       },
     });
   };
 
-  //create a string date to send influx
-  function dateToString(date: Date, option = false){
+  //CREATE STRING DATA TO SEND INFLUX
+  //this is used to make a date that influx syntax accept
+  function dateToString(date: Date){
     var year = (date.getFullYear()).toString();
     var month = (date.getMonth() + 1).toString();
 
@@ -210,15 +224,11 @@ function App() {
     }else{
       var day = (date.getDate()).toString();
     }
-    
-    if(option){
-      return (year + "-" + month + "-" + day).toString();
-    }else{
-      return (day + "/" + month + "/" + year).toString();
-    }
+
+    return (year + "-" + month + "-" + day).toString();
   }
 
-  //VictoryBars
+  //VICTORY BARS
   const defaultGraphic = (
     <VictoryChart
       height={windowDimensions.width <= 650 ? 290 : styles.chart.height} width={windowDimensions.width <= 650 ? 400 : styles.chart.width}
@@ -230,6 +240,7 @@ function App() {
         tickValues={arreglo.map(x => x.x)}
         tickFormat={arreglo.map(x => x.x.toLocaleDateString())}
       />
+      {/*if arreglo is empty only show  horizontal lines*/ }
       <VictoryAxis
         dependentAxis
         style={arreglo.length >= 1 ? styles.dependent : styles.dependentNull}
@@ -248,7 +259,7 @@ function App() {
     </VictoryChart>
   )
   
-  //victoryLine
+  //VICTORY LINE
   const lineGraphic = (
     <VictoryChart
       scale={{ x: "time" }}
@@ -275,8 +286,11 @@ function App() {
     </VictoryChart>
   )
 
-  const [graphic, setGraphic] = React.useState(defaultGraphic)
+  const [graphic, setGraphic] = React.useState(defaultGraphic); //This contain the graphic selected, Bars is default
 
+  //when graphic's data change, this will update graphic with actual data
+  //if only have 1 point and graphic "Line" is selected, this will change to bars
+  //VictoryLine can't show only 1 point
   React.useEffect(() => {
     if(info.graphic === "bars"){
       setGraphic(defaultGraphic);
@@ -329,13 +343,12 @@ function App() {
               </div>
             </article>
 
-            <div className="grafico">
+            <article className="grafico">
             {loading.graphic ? (msg) : (
               graphic
             )}
             <br></br>
-
-            </div>
+            </article>
 
             <article className="graphicOption">
             <div id="selectFactor">
