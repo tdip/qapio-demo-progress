@@ -2,6 +2,7 @@ import * as React from "react"
 import * as ReactDom from "react-dom"
 
 import { MainComponent } from "./pivot-table"
+import {MyUI} from "./pivot-table";
 
 const start = async () => {
 
@@ -35,7 +36,7 @@ const start = async () => {
     const ws = graph.getStreamWebsocket('input');*/
 
     ReactDom.render(
-        <MainComponent /*feed={ws} *//>,
+        <MyUI /*feed={ws} *//>,
         document.getElementById("root")
     );
 
